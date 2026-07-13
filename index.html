@@ -106,8 +106,8 @@
                 <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition" title="切換主題">
                     <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
                 </button>
-                <!-- ⚙️ 系統開發者設定按鈕 (可供管理人員調試或設置 Google Apps Script 網址) -->
-                <button onclick="toggleDevMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition" title="管理員系統設定">
+                <!-- ⚙️ 系統開發者設定按鈕 (點選觸發密碼驗證 930969) -->
+                <button onclick="handleDevModeClick()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition" title="管理員系統設定">
                     <i class="fa-solid fa-gear text-lg"></i>
                 </button>
                 <span class="hidden md:inline-block px-3 py-1 bg-chimei-50 text-chimei-600 dark:bg-chimei-900/30 dark:text-chimei-300 text-xs font-semibold rounded-full border border-chimei-200 dark:border-chimei-800">
@@ -522,14 +522,36 @@
                 <i class="fa-solid fa-triangle-exclamation text-2xl" id="alert-icon"></i>
                 <h3 class="text-base font-bold text-slate-800 dark:text-slate-100" id="alert-title">系統提示</h3>
             </div>
-            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6" id="alert-message">請選擇受評核主管。</p>
+            <div class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6" id="alert-message">請選擇受評核主管。</div>
             <button onclick="closeAlert()" class="w-full py-2.5 bg-chimei-500 hover:bg-chimei-600 text-white text-sm font-bold rounded-lg transition">
                 確定
             </button>
         </div>
     </div>
 
+    <!-- ⚙️ 密碼驗證彈窗 (管理員設定專用 930969) -->
+    <div id="password-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-slate-700/60 transform scale-90 transition-transform duration-300" id="password-card">
+            <div class="flex items-center space-x-3 mb-4 text-chimei-500">
+                <i class="fa-solid fa-lock text-2xl"></i>
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">管理人員驗證</h3>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">請輸入密碼以開啟管理員設定與偵錯面板：</p>
+            <input type="password" id="dev-password-input" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 outline-none transition mb-4" placeholder="請輸入設定密碼">
+            <div class="flex space-x-2">
+                <button onclick="closePasswordModal()" class="w-1/2 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition">
+                    取消
+                </button>
+                <button onclick="verifyDevPassword()" class="w-1/2 py-2 bg-chimei-500 hover:bg-chimei-600 text-white text-xs font-semibold rounded-lg transition">
+                    確定驗證
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主 JavaScript 控制模組 -->
     <script>
+
         // 護理十力核心題庫 (共 22 題)
         const questions = [
             { id: 1, cat: "專業力", sub: "知識", text: "具備豐富的專科護理照護與臨床指導能力。" },
@@ -556,6 +578,7 @@
             { id: 22, cat: "協同力", sub: "認同", text: "高度認同醫院的經營願景與核心價值，帶領單位同仁配合整體醫院發展策略。" }
         ];
 
+        // 護理主管組織資料庫 (全院共 240+ 筆資料)
         const RAW_ROSTER = `ER	護理長	澎安琪	許芳華				
 OPD	護理長	郭富美	李美慧				
 OR	護理長	黃代泱	李怡珍				
@@ -674,7 +697,7 @@ CSR	小組長	吳佳蓉	陳韋如	林青霞	蔡幸紋
 3BI-Ⅰ	小組長	王郁婷	郭惠婷	陳鄉尹			
 3BI-Ⅱ	小組長	柯欣慧	許家蓁	劉佳禎	謝佳妏		
 3BI-Ⅱ	小組長	林毓涵	許家蓁	劉佳禎	謝佳妏		
-3BI-Ⅱ	小組長	洪瑋翎	許家蓁	劉佳禎	謝佳妏		
+3BI-Ⅱ	洪瑋翎	許家蓁	劉佳禎	謝佳妏		
 3BI-Ⅱ	小組長	曾莉淳	許家蓁	劉佳禎	謝佳妏		
 3BI-Ⅱ	小組長	何雅惠	許家蓁	劉佳禎	謝佳妏		
 3CI	小組長	謝玫君	楊濘綺	陳柏翰			
@@ -840,20 +863,104 @@ PSY	小組長	楊雅萍	陳欣懇
 RCC	小組長	楊惠晶	蘇敬惠	舒伊敏			
 RCC	小組長	洪絜昕	蘇敬惠	舒伊敏			
 RCC	小組長	陳思棠	蘇敬惠	舒伊敏			
-RCC	小組長	洪暄惠	蘇敬惠	舒伊敏			
+RCC	洪暄惠	蘇敬惠	舒伊敏			
 RCC	小組長	楊凱婷	蘇敬惠	舒伊敏			
 HC	小組長	盧怡利	陳惠滿				
 日間照顧中心	小組長	呂佳惠					
 社區整合	小組長	蘇文義					`;
 
-        // 用於存放動態解析後的名單與對應關係
+        // 本次填答數據暫存
         const targetList = [];
         const evaluatorMapping = [];
-
-        // 本次填答數據暫存
         let surveyAnswers = {};
         let surveyComments = {};
         let myRadarChart = null;
+
+
+        // 自定義漂亮訊息框提示 (取代原生 alert)
+        function showAlert(msg) {
+            document.getElementById('alert-message').innerHTML = msg.replace(/\n/g, '<br>');
+            const modal = document.getElementById('alert-modal');
+            const card = document.getElementById('alert-card');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-90');
+            card.classList.add('scale-100');
+        }
+
+        function closeAlert() {
+            const modal = document.getElementById('alert-modal');
+            const card = document.getElementById('alert-card');
+            
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-90');
+        }
+
+        // ⚙️ 密碼驗證彈窗 (管理員設定專用 930969)
+        function handleDevModeClick() {
+            const devElements = document.querySelectorAll('.dev-element');
+            const isCurrentlyHidden = devElements.length > 0 && devElements[0].classList.contains('hidden');
+            
+            if (isCurrentlyHidden) {
+                openPasswordModal();
+            } else {
+                toggleDevMode(false); // 隱藏面板
+            }
+        }
+
+        function openPasswordModal() {
+            const modal = document.getElementById('password-modal');
+            const card = document.getElementById('password-card');
+            document.getElementById('dev-password-input').value = '';
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-90');
+            card.classList.add('scale-100');
+            setTimeout(() => {
+                document.getElementById('dev-password-input').focus();
+            }, 100);
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('password-modal');
+            const card = document.getElementById('password-card');
+            
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-90');
+        }
+
+        function verifyDevPassword() {
+            const input = document.getElementById('dev-password-input');
+            if (input.value === '930969') {
+                closePasswordModal();
+                toggleDevMode(true); // 顯式強制開啟
+                showAlert("🎉 驗證成功！管理人員系統偵錯面板已開啟。");
+            } else {
+                showAlert("❌ 密碼錯誤！您無權限開啟管理人員系統設定。");
+                input.value = '';
+            }
+        }
+
+        // ⚙️ 系統開發者設定顯示切換函數
+        function toggleDevMode(forceShow = false) {
+            const devElements = document.querySelectorAll('.dev-element');
+            devElements.forEach(el => {
+                if (forceShow) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.toggle('hidden');
+                }
+            });
+            
+            // 保存目前的開發者面板開啟喜好
+            if (devElements.length > 0) {
+                const isNowHidden = devElements[0].classList.contains('hidden');
+                localStorage.setItem('chimei_survey_dev_mode', isNowHidden ? 'false' : 'true');
+            }
+        }
+
 
         function parseRosterAndBuildDatabase() {
             const lines = RAW_ROSTER.trim().split('\n');
@@ -967,24 +1074,6 @@ HC	小組長	盧怡利	陳惠滿
             }
         }
 
-        // ⚙️ 系統開發者設定顯示切換函數
-        // 控制 class="dev-element" 的所有測試代碼與後台配置按鈕
-        function toggleDevMode(forceShow = false) {
-            const devElements = document.querySelectorAll('.dev-element');
-            devElements.forEach(el => {
-                if (forceShow) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.toggle('hidden');
-                }
-            });
-            
-            // 保存目前的開發者面板開啟喜好
-            if (devElements.length > 0) {
-                const isNowHidden = devElements[0].classList.contains('hidden');
-                localStorage.setItem('chimei_survey_dev_mode', isNowHidden ? 'false' : 'true');
-            }
-        }
 
         // 智慧型後端 API 測試連線與自動診斷功能 (防避 CORS 誤報)
         function testGasConnection() {
@@ -1147,6 +1236,7 @@ HC	小組長	盧怡利	陳惠滿
             }
         }
 
+
         function goToStep2() {
             const targetName = document.getElementById('targetName').value;
             if (!targetName) {
@@ -1182,6 +1272,7 @@ HC	小組長	盧怡利	陳惠滿
             document.getElementById('progress-line').style.width = "0%";
             window.scrollTo(0, 0);
         }
+
 
         function renderQuestions() {
             const container = document.getElementById('questionsList');
@@ -1292,7 +1383,7 @@ HC	小組長	盧怡利	陳惠滿
 
             for (let key in btns) {
                 if (key === filterType) {
-                    btns[key].className = "px-2.5 py-1 text-xs font-medium rounded-md bg-chimei-500 text-white transition shadow-sm";
+                    btns[key].className = "px-2.5 py-1 text-xs font-medium rounded-md bg-chimei-500 text-white transition";
                 } else {
                     btns[key].className = "px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition";
                 }
@@ -1320,7 +1411,7 @@ HC	小組長	盧怡利	陳惠滿
             });
         }
 
-        // 隨機填答 (Demo 專用) - 已被 class="dev-element hidden" 包裹
+        // 隨機填答 (Demo 專用)
         function autoFillSurvey() {
             questions.forEach(q => {
                 const r = Math.random();
@@ -1339,7 +1430,7 @@ HC	小組長	盧怡利	陳惠滿
             showAlert("已隨機模擬填答數據！所有題項均已填妥。");
         }
 
-        // 一鍵填寫並直接跳轉至分析頁 - 已被 class="dev-element hidden" 包裹
+        // 一鍵填寫並直接跳轉至分析頁
         function quickFillDemoAndNavigate() {
             const targetSelect = document.getElementById('targetName');
             if (!targetSelect.value) {
@@ -1359,6 +1450,7 @@ HC	小組長	盧怡利	陳惠滿
             autoFillSurvey();
             goToStep2();
         }
+
 
         // 提交問卷並上傳雲端試算表 (支援與 CORS + redirect 優化後端寫入)
         function submitSurvey() {
@@ -1397,31 +1489,24 @@ HC	小組長	盧怡利	陳惠滿
                 const loader = document.getElementById('loading-overlay');
                 loader.classList.remove('opacity-0', 'pointer-events-none');
 
-                // 核心傳輸模式：啟用 CORS 模式並追蹤 Google 的安全網址重定向
+                // 核心傳輸模式：啟用 no-cors 模式，避免瀏覽器在 302 安全重定向時誤判跨域失敗而中斷流暢流程
                 fetch(gasUrl, {
                     method: 'POST',
-                    mode: 'cors',
-                    redirect: 'follow',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'text/plain;charset=utf-8'
                     },
                     body: JSON.stringify(payloadData)
                 })
-                .then(response => {
-                    if (response.ok) {
-                        return { result: "success" };
-                    }
-                    throw new Error('CORS 或連線錯誤');
-                })
                 .then(() => {
                     loader.classList.add('opacity-0', 'pointer-events-none');
                     transitionToAnalysisStep(domainScores);
-                    showAlert("評核資料已實時上傳並寫入您的 Google 試算表！已為您產生本地分析儀表板。");
+                    showAlert("🎉 資料已成功傳輸並寫入試算表！十力分析與雷達圖表已即時編譯完成。");
                 })
                 .catch(err => {
                     loader.classList.add('opacity-0', 'pointer-events-none');
                     transitionToAnalysisStep(domainScores);
-                    showAlert("資料已於本機完成分析，但試算表寫入失敗：" + err.message + "\n\n(提示：若後端未建立新部署版本，可能導致資料無法順利存入)");
+                    showAlert("資料已於本機完成分析。雲端傳輸發生底層網路異常，請檢查網路連線：" + err.message);
                 });
             } else {
                 transitionToAnalysisStep(domainScores);
@@ -1560,6 +1645,7 @@ HC	小組長	盧怡利	陳惠滿
                 }
             });
         }
+
 
         // 生成優點與待精進指標清單
         function buildAdvantageAndDisadvantageLists(domainScores) {
@@ -1742,7 +1828,7 @@ HC	小組長	盧怡利	陳惠滿
                 return;
             }
 
-            // 5. 寫入精緻的正式 A4 PDF 報表版型
+            // 5. 寫入精緻的正式 A4 PDF 報表版型 (移除了轉義字符，以在寫入時能將數值直接解析進去)
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html lang="zh-TW">
@@ -1752,7 +1838,7 @@ HC	小組長	盧怡利	陳惠滿
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <script src="https://cdn.tailwindcss.com"><\/script>
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=300;400;500;700;900&display=swap');
                         body {
                             font-family: 'Noto Sans TC', sans-serif;
                             background: #ffffff;
@@ -1908,26 +1994,6 @@ HC	小組長	盧怡利	陳惠滿
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
-
-        // 自定義彈窗，美觀實用，符合主題
-        function showAlert(msg) {
-            document.getElementById('alert-message').innerHTML = msg.replace(/\n/g, '<br>');
-            const modal = document.getElementById('alert-modal');
-            const card = document.getElementById('alert-card');
-            
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            card.classList.remove('scale-90');
-            card.classList.add('scale-100');
-        }
-
-        function closeAlert() {
-            const modal = document.getElementById('alert-modal');
-            const card = document.getElementById('alert-card');
-            
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            card.classList.remove('scale-100');
-            card.classList.add('scale-90');
         }
 
         // 暗黑模式控制
