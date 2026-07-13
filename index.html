@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奇美醫院 - 護理主管護理十力調查問卷系統</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        chimei: {
+                            50: '#f0fbf8',
+                            100: '#d1f4ec',
+                            500: '#007d65', // 奇美經典綠
+                            600: '#006652',
+                            700: '#005040',
+                            800: '#003c30',
+                            900: '#002921'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        @media print {
+            /* 強制背景與文字改為列印模式 */
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 12pt !important;
+            }
+            /* 隱藏網頁元件 */
+            header, footer, .no-print, button, .dev-element, #progress-line, .sticky, .flex-shrink-0 {
+                display: none !important;
+            }
+            /* 調整容器版面以填滿紙張 */
+            main {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .bg-white, .dark\:bg-slate-800 {
+                background: #ffffff !important;
+                color: #000000 !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            /* 正式報表抬頭 (只在列印時出現) */
+            #print-report-header {
+                display: block !important;
+            }
+            /* 簽核簽章欄位 (只在列印時出現) */
+            #print-report-signatures {
+                display: grid !important;
+            }
+            /* 防止圖表與核心區塊在跨頁時被攔腰截斷 */
+            .chart-print-container {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            .print-avoid-break {
+                page-break-inside: avoid;
+            }
+            /* 雷達圖尺寸調整 */
+            #radarChart {
+                max-width: 280px !important;
+                max-height: 280px !important;
+                margin: 0 auto !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900/90 dark:text-slate-100 transition-colors duration-200 min-h-screen flex flex-col">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-chimei-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-chimei-100 dark:shadow-none">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold text-chimei-500 dark:text-chimei-100">奇美醫療財團法人奇美醫院</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">護理主管護理十力調查問卷 · 系統端</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 no-print">
+                <!-- 暗黑模式切換 -->
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition" title="切換主題">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+                <!-- ⚙️ 系統開發者設定按鈕 (可供管理人員調試或設置 Google Apps Script 網址) -->
+                <button onclick="toggleDevMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition" title="管理員系統設定">
+                    <i class="fa-solid fa-gear text-lg"></i>
+                </button>
+                <span class="hidden md:inline-block px-3 py-1 bg-chimei-50 text-chimei-600 dark:bg-chimei-900/30 dark:text-chimei-300 text-xs font-semibold rounded-full border border-chimei-200 dark:border-chimei-800">
+                    <i class="fa-solid fa-table-cells mr-1"></i>標準版對應
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8">
+        
+        <!-- 進度指示器 -->
+        <div class="mb-8 no-print">
+            <div class="flex items-center justify-between max-w-md mx-auto relative">
+                <!-- 進度條連線 -->
+                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-200 dark:bg-slate-700 z-0"></div>
+                <div id="progress-line" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-chimei-500 z-0 transition-all duration-300" style="width: 0%;"></div>
+
+                <!-- 步驟 1 -->
+                <div class="z-10 text-center">
+                    <div id="step-node-1" class="w-10 h-10 rounded-full bg-chimei-500 text-white flex items-center justify-center font-semibold shadow-lg transition-all duration-300">
+                        1
+                    </div>
+                    <span class="text-xs font-medium mt-1 block text-slate-600 dark:text-slate-400">基本資料</span>
+                </div>
+                <!-- 步驟 2 -->
+                <div class="z-10 text-center">
+                    <div id="step-node-2" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 flex items-center justify-center font-semibold transition-all duration-300">
+                        2
+                    </div>
+                    <span class="text-xs font-medium mt-1 block text-slate-400 dark:text-slate-500">問卷填答</span>
+                </div>
+                <!-- 步驟 3 -->
+                <div class="z-10 text-center">
+                    <div id="step-node-3" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 flex items-center justify-center font-semibold transition-all duration-300">
+                        3
+                    </div>
+                    <span class="text-xs font-medium mt-1 block text-slate-400 dark:text-slate-500">分析回饋</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 列印專用正式報表抬頭 (預設隱藏，列印時自動浮現) ================= -->
+        <div id="print-report-header" class="hidden mb-6 border-b-2 border-slate-800 pb-4 text-center">
+            <h2 class="text-2xl font-black tracking-wide text-slate-900">奇美醫療財團法人奇美醫院</h2>
+            <h3 class="text-xl font-bold text-slate-800 mt-1">護理主管「護理十力」核心素養評測分析報告</h3>
+            <div class="grid grid-cols-2 gap-4 mt-4 text-left text-xs text-slate-700 border-t border-dashed border-slate-350 pt-3">
+                <div>
+                    <p><strong>被評核主管：</strong><span id="print-target-meta">--</span></p>
+                    <p><strong>評核年度：</strong><span id="print-year-meta">--</span></p>
+                    <p><strong>評核模式：</strong><span id="print-mode-meta">--</span></p>
+                </div>
+                <div class="text-right">
+                    <p><strong>他評主管：</strong><span id="print-evaluator-meta">--</span></p>
+                    <p><strong>對應評估關係：</strong><span id="print-relation-meta">--</span></p>
+                    <p><strong>報告產出時間：</strong><span id="print-time-meta">--</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTAINER FOR FORM CARDS -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/50 p-6 md:p-10 transition-colors duration-200">
+
+            <!-- 
+                 [測試代碼]：後端 Google Apps Script 部署網址卡片
+                 套用 class="dev-element hidden"，預設不對使用者開放。點選 header 的「齒輪」即可顯示 
+            -->
+            <div id="dev-api-config" class="dev-element hidden mb-6 p-4 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
+                <label for="gasUrl" class="block text-xs font-bold text-chimei-600 dark:text-chimei-400 mb-1.5 flex items-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1.5 text-sm animate-pulse"></i> Google Apps Script 部署網址 (Web App URL) [測試與管理專用]
+                </label>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="gasUrl" class="flex-grow rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 outline-none transition" placeholder="https://script.google.com/macros/s/AKfycbwvyhNn-F3T_2Sy1gUCkU1MzV7McblSaJYQwbRVo78pARgaSVootfONkcLaUEiTKp3A/exec" oninput="saveGasUrl()">
+                    <div class="flex gap-2 shrink-0">
+                        <button type="button" onclick="testGasConnection()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition flex items-center shadow-sm">
+                            <i class="fa-solid fa-plug mr-1.5 animate-pulse"></i> 測試連線
+                        </button>
+                        <span class="text-[10px] text-slate-400 self-center whitespace-nowrap"><i class="fa-solid fa-floppy-disk mr-1"></i>自動儲存</span>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5">填入 Web App URL 後，本問卷提交將透過 POST 跨域安全重定向，即時平鋪存入試算表。</p>
+            </div>
+
+            <!-- ================= STEP 1: 基本資料 ================= -->
+            <div id="step1" class="step-content">
+                
+                <div class="mb-8 border-b border-slate-100 dark:border-slate-700 pb-5">
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
+                        <i class="fa-solid fa-id-card text-chimei-500 mr-2"></i>
+                        第一階段：評核基本資料確認
+                    </h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">請設定您的評核模式，並快速搜尋您要進行評核的主管人員。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- 評核模式 -->
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="fa-solid fa-user-shield text-chimei-500 mr-1"></i> 評核模式設定
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- 自評標籤 -->
+                            <label class="relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition focus-within:ring-2 focus-within:ring-chimei-500 focus-within:ring-offset-2 border-chimei-500 bg-chimei-50/50 dark:bg-chimei-950/20 text-chimei-600 dark:text-chimei-400" id="modeSelfLabel">
+                                <input type="radio" name="evalMode" value="self" checked class="sr-only" onchange="toggleMode()">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-user-check text-xl mb-1 block"></i>
+                                    <span class="text-sm font-bold block">評核自己 (自評)</span>
+                                </div>
+                            </label>
+
+                            <!-- 他評標籤 -->
+                            <label class="relative flex items-center justify-center p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition focus-within:ring-2 focus-within:ring-chimei-500 focus-within:ring-offset-2 text-slate-600 dark:text-slate-400" id="modeOtherLabel">
+                                <input type="radio" name="evalMode" value="other" class="sr-only" onchange="toggleMode()">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-users text-xl mb-1 block"></i>
+                                    <span class="text-sm font-bold block">評核他人 (他評)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 評核年度 -->
+                    <div>
+                        <label for="evalYear" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="fa-solid fa-calendar-days text-chimei-500 mr-1"></i> 評核年度
+                        </label>
+                        <select class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 transition shadow-sm" id="evalYear">
+                            <option value="115" selected>115年度</option>
+                            <option value="116">116年度</option>
+                            <option value="117">117年度</option>
+                            <option value="118">118年度</option>
+                        </select>
+                    </div>
+
+                    <!-- 單位與名單搜尋 -->
+                    <div>
+                        <label for="searchUnit" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="fa-solid fa-magnifying-glass text-chimei-500 mr-1"></i> 快速篩選 (被評核者單位、職稱或姓名)
+                        </label>
+                        <div class="relative">
+                            <input type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 pl-10 pr-4 py-3 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 transition shadow-sm" id="searchUnit" placeholder="例如: ER、小組長、澎安琪..." oninput="filterTargets()">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                <i class="fa-solid fa-keyboard"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 被評核者選擇 -->
+                    <div>
+                        <label for="targetName" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="fa-solid fa-user-tag text-chimei-500 mr-1"></i> 被評核者姓名 <span class="text-rose-500">*</span>
+                        </label>
+                        <select class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 transition shadow-sm" id="targetName" onchange="updateTargetInfo()">
+                            <!-- 動態載入 -->
+                        </select>
+                    </div>
+
+                    <!-- 被評核者單位 & 職稱 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="targetUnit" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                <i class="fa-solid fa-hospital text-chimei-500 mr-1"></i> 被評核者單位
+                            </label>
+                            <input type="text" class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-slate-600 dark:text-slate-400 font-medium" id="targetUnit" readonly placeholder="系統帶出">
+                        </div>
+                        <div>
+                            <label for="targetTitle" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                <i class="fa-solid fa-award text-chimei-500 mr-1"></i> 被評核者職稱
+                            </label>
+                            <input type="text" class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-slate-600 dark:text-slate-400 font-medium" id="targetTitle" readonly placeholder="系統帶出">
+                        </div>
+                    </div>
+
+                    <!-- 他評模式專用區塊 (他評者對應與資訊連動) -->
+                    <div id="evaluatorInfo" class="col-span-1 md:col-span-2 hidden bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-700 rounded-xl p-5 mt-2 transition-all">
+                        <h3 class="text-sm font-bold text-chimei-600 dark:text-chimei-400 mb-3 flex items-center">
+                            <i class="fa-solid fa-circle-info mr-1.5"></i> 系統對應：他評者名單確認 (依據評核關係對應)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- 他評者姓名 -->
+                            <div class="md:col-span-1">
+                                <label for="evaluatorName" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">他評者姓名 <span class="text-rose-500">*</span></label>
+                                <select id="evaluatorName" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 transition" onchange="updateEvaluatorInfo()">
+                                    <option value="">-- 請先選擇被評核人 --</option>
+                                </select>
+                            </div>
+                            <!-- 他評者單位 -->
+                            <div class="md:col-span-1">
+                                <label for="evaluatorUnit" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">他評者單位</label>
+                                <input type="text" id="evaluatorUnit" class="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 font-medium" readonly placeholder="自動帶出">
+                            </div>
+                            <!-- 他評者職稱 -->
+                            <div class="md:col-span-1">
+                                <label for="evaluatorTitle" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">他評者職稱</label>
+                                <input type="text" id="evaluatorTitle" class="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 font-medium" readonly placeholder="自動帶出">
+                            </div>
+                            <!-- 評核關係 -->
+                            <div class="md:col-span-1">
+                                <label for="evaluatorRelation" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">與被評核者關係</label>
+                                <input type="text" id="evaluatorRelation" class="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-chimei-600 dark:text-chimei-400 font-semibold" readonly placeholder="自動帶出">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 流程按鈕 -->
+                <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-end items-center gap-3">
+                    <!-- 
+                         [測試代碼]：一鍵填寫測試
+                         套用 class="dev-element hidden"，預設隱藏。點選「齒輪」即可切換顯示。 
+                    -->
+                    <button type="button" onclick="quickFillDemoAndNavigate()" class="dev-element hidden w-full md:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition flex items-center justify-center">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2 text-chimei-500"></i> 一鍵速填(測試用)
+                    </button>
+                    <button onclick="goToStep2()" class="w-full md:w-auto px-8 py-4 bg-chimei-500 hover:bg-chimei-600 text-white font-bold rounded-xl shadow-lg shadow-chimei-500/20 hover:shadow-chimei-500/30 transition flex items-center justify-center">
+                        進入問卷填答 <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= STEP 2: 問卷題項 ================= -->
+            <div id="step2" class="step-content hidden">
+                <div class="mb-6 border-b border-slate-100 dark:border-slate-700 pb-5">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
+                                <i class="fa-solid fa-square-poll-horizontal text-chimei-500 mr-2"></i>
+                                第二階段：護理主管十力指標評估
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">請針對受評者表現，依序給予 1 ~ 5 分。填寫 1~3 分者須提供簡要理由。</p>
+                        </div>
+                        <!-- 
+                             [測試代碼]：隨機填答模擬按鈕
+                             套用 class="dev-element hidden"，預設不對使用者開放。點選「齒輪」顯示。 
+                        -->
+                        <button onclick="autoFillSurvey()" class="dev-element hidden self-start md:self-auto text-xs px-3 py-1.5 border border-chimei-300 text-chimei-600 dark:text-chimei-300 dark:border-chimei-700 rounded-lg hover:bg-chimei-50 dark:hover:bg-chimei-950/20 transition flex items-center">
+                            <i class="fa-solid fa-bolt mr-1"></i> 自動隨機填答 (Demo)
+                        </button>
+                    </div>
+
+                    <!-- 評分說明卡 -->
+                    <div class="mt-4 p-4 rounded-xl bg-amber-50/50 border border-amber-200 dark:bg-slate-900/20 dark:border-amber-900/30 text-amber-800 dark:text-amber-200 text-xs flex items-start space-x-2">
+                        <i class="fa-solid fa-circle-exclamation mt-0.5 text-amber-500"></i>
+                        <div>
+                            <span class="font-bold">評分規約：</span>
+                            <span class="font-semibold text-emerald-600 dark:text-emerald-400">5分</span>（極為同意）、
+                            <span>4分</span>（同意）、
+                            <span>3分</span>（普通）、
+                            <span>2分</span>（不同意）、
+                            <span class="font-semibold text-rose-500">1分</span>（非常不同意）。
+                            <span class="underline font-bold text-rose-600 dark:text-rose-400">若給予 1~3 分（含），將要求填寫具體原因與建議。</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 填答進度浮動條 -->
+                <div class="sticky top-[73px] bg-white dark:bg-slate-800 py-3 z-30 border-b border-slate-100 dark:border-slate-700/60 flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+                    <div class="flex-grow">
+                        <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                            <span>填答進度：<span id="answered-count" class="text-chimei-500 dark:text-chimei-400">0</span> / <span id="total-count">0</span> 題</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
+                            <div id="survey-inner-progress" class="bg-chimei-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <!-- 篩選按鈕列 -->
+                    <div class="flex items-center space-x-1.5 flex-shrink-0 self-end md:self-auto">
+                        <button onclick="filterQuestions('all')" id="filter-all" class="px-2.5 py-1 text-xs font-medium rounded-md bg-chimei-500 text-white transition">全部</button>
+                        <button onclick="filterQuestions('unanswered')" id="filter-unanswered" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition">未填 (<span id="unanswered-badge">0</span>)</button>
+                        <button onclick="filterQuestions('lowScore')" id="filter-low" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition">須填理由 (<span id="lowscore-badge">0</span>)</button>
+                    </div>
+                </div>
+
+                <!-- 問卷題項動態生成 -->
+                <div id="questionsList" class="space-y-6"></div>
+
+                <!-- 流程控制 -->
+                <div class="mt-10 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-4">
+                    <button class="w-full sm:w-1/2 py-4 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition flex items-center justify-center" onclick="goToStep1()">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> 返回修改基本資料
+                    </button>
+                    <button class="w-full sm:w-1/2 py-4 bg-chimei-500 hover:bg-chimei-600 text-white font-bold rounded-xl shadow-lg shadow-chimei-500/20 hover:shadow-chimei-500/30 transition flex items-center justify-center" onclick="submitSurvey()">
+                        提交問卷並計算分析 <i class="fa-solid fa-chart-line ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= STEP 3: 分析儀表板 ================= -->
+            <div id="step3" class="step-content hidden">
+                <div class="mb-6 border-b border-slate-100 dark:border-slate-700 pb-5 text-center no-print">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-500 dark:text-emerald-400 text-3xl mb-4">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">問卷評估完成！</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">評估資料已成功編譯。以下為您實時生成被評核者的「護理十力」雷達分析圖與報表。</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- 左側：雷達圖 analysis -->
+                    <div class="lg:col-span-5 flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700/50 chart-print-container">
+                        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 self-start"><i class="fa-solid fa-chart-pie text-chimei-500 mr-1.5"></i> 主管護理十力分析圖 (雷達圖)</h3>
+                        <div class="w-full max-w-[320px] aspect-square flex items-center justify-center">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-4">註：此圖表分數加總平均後，各能力項之滿分為 5.0。主管平均在 4.0 以上代表該項能力優異。</p>
+                    </div>
+
+                    <!-- 右側：指標分數與建議 -->
+                    <div class="lg:col-span-7 space-y-6 print-avoid-break">
+                        <div class="bg-white dark:bg-slate-800 rounded-xl">
+                            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-star text-amber-500 mr-1.5"></i> 核心優勢指標 (得分前 2 高)</h3>
+                            <div id="strong-domains" class="space-y-3">
+                                <!-- 動態填入 -->
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-xl pt-4 print-avoid-break">
+                            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1.5"></i> 待精進能力指標 (得分後 2 低)</h3>
+                            <div id="weak-domains" class="space-y-3">
+                                <!-- 動態填入 -->
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-xl pt-4 print-avoid-break">
+                            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2"><i class="fa-solid fa-comments text-chimei-500 mr-1.5"></i> 具體原因及輔導建議</h3>
+                            <div id="comments-summary" class="max-h-48 overflow-y-auto text-xs space-y-2 pr-1 scrollbar-thin">
+                                <!-- 動態填入 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= 列印專用正式簽章區 (預設隱藏，列印與轉存 PDF 時自動浮現) ================= -->
+                <div id="print-report-signatures" class="hidden grid-cols-3 gap-6 mt-12 border-t border-slate-300 pt-8 text-center text-xs text-slate-800 font-medium">
+                    <div class="flex flex-col justify-between h-24 border border-dashed border-slate-300 rounded-lg p-3">
+                        <span class="text-slate-500">被評核主管簽章</span>
+                        <span class="text-slate-300">蓋章/簽名處</span>
+                    </div>
+                    <div class="flex flex-col justify-between h-24 border border-dashed border-slate-300 rounded-lg p-3">
+                        <span class="text-slate-500">評核主管/督導簽章</span>
+                        <span class="text-slate-300">蓋章/簽名處</span>
+                    </div>
+                    <div class="flex flex-col justify-between h-24 border border-dashed border-slate-300 rounded-lg p-3">
+                        <span class="text-slate-500">護理部主任核章</span>
+                        <span class="text-slate-300">蓋章/核准處</span>
+                    </div>
+                </div>
+
+                <!-- 
+                     [測試代碼]：試算表對應扁平欄位 JSON 預覽
+                     套用 class="dev-element hidden"，預設不對使用者開放。點選「齒輪」顯示。 
+                -->
+                <div id="dev-json-payload" class="dev-element hidden mt-8 p-5 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center mb-3">
+                        <i class="fa-solid fa-database text-emerald-500 mr-2 text-lg"></i>
+                        試算表對應欄位 JSON Payload (一維平鋪結構) [測試與管理專用]
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                        本系統產出的 JSON Payload 已採取 **一維扁平化 (Flattened) 結構**。各欄位名稱與您 Google 試算表之表頭欄位完全對應。
+                    </p>
+                    <div class="w-full">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Spreadsheet Row Parameters (準備上傳的扁平化 JSON)</span>
+                            <button onclick="copyPayload()" class="text-[10px] text-chimei-500 dark:text-chimei-300 hover:underline flex items-center"><i class="fa-regular fa-copy mr-1"></i>複製資料</button>
+                        </div>
+                        <pre id="json-payload" class="bg-slate-900 text-slate-300 p-3 rounded-lg text-[10px] font-mono h-48 overflow-y-auto w-full"></pre>
+                    </div>
+                </div>
+
+                <!-- 下一步或匯出 -->
+                <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 no-print">
+                    <button class="px-5 py-3 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm flex items-center justify-center" onclick="resetSurvey()">
+                        <i class="fa-solid fa-redo mr-2"></i> 重置並填寫下一份
+                    </button>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="printFormalReport()" class="px-5 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center shadow-md shadow-slate-800/10">
+                            <i class="fa-solid fa-print mr-2"></i> 列印 / 儲存 PDF 報表
+                        </button>
+                        <button onclick="exportCSV()" class="px-5 py-3 bg-chimei-500 hover:bg-chimei-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center shadow-md shadow-chimei-500/15">
+                            <i class="fa-solid fa-file-excel mr-2"></i> 導出 CSV 結果表
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 頁尾宣告 -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 mt-auto py-6 text-center text-xs text-slate-400 dark:text-slate-500 no-print">
+        <p>© 2026 奇美醫院護理部 & 資訊部 · 護理部主管核心素養評測系統</p>
+        <p class="mt-1">此預覽環境中無任何敏感醫療個資。請放心進行問卷測試。</p>
+    </footer>
+
+    <!-- 全域提交中 Loading 遮罩 -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 flex flex-col items-center max-w-xs shadow-2xl border border-slate-100 dark:border-slate-700">
+            <div class="w-12 h-12 border-4 border-chimei-100 border-t-chimei-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-sm font-bold text-slate-800 dark:text-slate-100">正在寫入雲端試算表...</p>
+            <p class="text-[10px] text-slate-400 mt-1">請勿關閉視窗，預估需要 2 至 4 秒</p>
+        </div>
+    </div>
+
+    <!-- 自定義漂亮訊息框提示 (取代原生 alert) -->
+    <div id="alert-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-slate-700/60 transform scale-90 transition-transform duration-300" id="alert-card">
+            <div class="flex items-center space-x-3 mb-4 text-amber-500">
+                <i class="fa-solid fa-triangle-exclamation text-2xl" id="alert-icon"></i>
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100" id="alert-title">系統提示</h3>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6" id="alert-message">請選擇受評核主管。</p>
+            <button onclick="closeAlert()" class="w-full py-2.5 bg-chimei-500 hover:bg-chimei-600 text-white text-sm font-bold rounded-lg transition">
+                確定
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 護理十力核心題庫 (共 22 題)
+        const questions = [
+            { id: 1, cat: "專業力", sub: "知識", text: "具備豐富的專科護理照護與臨床指導能力。" },
+            { id: 2, cat: "專業力", sub: "技能", text: "具備協助制(修)訂單位工作規範、照護常規或標準作業流程(SOP)的能力。" },
+            { id: 3, cat: "專業力", sub: "技能", text: "具備主動發掘、系統化分析，並妥善解決臨床工作流程問題的能力。" },
+            { id: 4, cat: "專業力", sub: "學術", text: "具備指導同仁撰寫實證護理(PICO)、個案報告、案例分析或專案書寫的能力。" },
+            { id: 5, cat: "彈性力", sub: "抗壓", text: "面對繁重工作負荷、高壓情境或突發危機時，能展現正向的調適力。" },
+            { id: 6, cat: "彈性力", sub: "適應", text: "面對政策改變或臨時人力調度等環境異動時，能迅速展現高度適應力。" },
+            { id: 7, cat: "溝通力", sub: "管道", text: "能清晰、精準地將院方與護理部政策傳達給同仁，落實暢通的雙向溝通。" },
+            { id: 8, cat: "溝通力", sub: "衝突", text: "能真誠聆聽同仁心聲，同理其感受，並具有妥善協調跨團隊衝突的能力。" },
+            { id: 9, cat: "領導力", sub: "凝聚", text: "能建立高向心力團隊，激發同仁的工作動機，共同達成單位的品質指標。" },
+            { id: 10, cat: "領導力", sub: "典範", text: "能展現專業護理主管風範、嚴守職業倫理，成為同仁的良好模範。" },
+            { id: 11, cat: "決策力", sub: "分析", text: "能根據實證與客觀數據做出決策，確保決策公正性，且符合臨床最佳利益。" },
+            { id: 12, cat: "決策力", sub: "承擔", text: "於緊急情境能臨危不亂，當機立斷，並勇於為決策結果承擔相應責任。" },
+            { id: 13, cat: "培育力", sub: "發展", text: "能妥善規劃並推動單位同仁的在職教育、教學輔導與進階（N至N4）訓練。" },
+            { id: 14, cat: "培育力", sub: "提攜", text: "關懷新進人員適應情形，指派適合臨床教師指導，並協助其職涯成長。" },
+            { id: 15, cat: "創新力", sub: "思維", text: "具備創新思維，積極鼓勵同仁進行臨床實務改進、研發輔具或創新作法。" },
+            { id: 16, cat: "創新力", sub: "資訊", text: "能鼓勵並引導同仁善用數位化工具與資訊科技，以精簡繁瑣工作流程。" },
+            { id: 17, cat: "關懷力", sub: "關愛", text: "真誠關懷同仁身心平衡與工作負荷，積極營造健康友善、溫馨的職場氛圍。" },
+            { id: 18, cat: "關懷力", sub: "同理", text: "能敏銳體察病患及家屬的需求與期望，帶領團隊落實全人感同身受之關懷。" },
+            { id: 19, cat: "執行力", sub: "效率", text: "對上級或護理部指派的專案工作，能妥善規劃，並高效率地在預期時間內完成。" },
+            { id: 20, cat: "執行力", sub: "品管", text: "落實定期工作稽核，隨時監測照護品質指標，運用PDCA工具進行持續改善。" },
+            { id: 21, cat: "協同力", sub: "合作", text: "主動與跨領域團隊（醫師、醫事人員、行政單位）合作，暢通科別溝通流程。" },
+            { id: 22, cat: "協同力", sub: "認同", text: "高度認同醫院的經營願景與核心價值，帶領單位同仁配合整體醫院發展策略。" }
+        ];
+
+        const RAW_ROSTER = `ER	護理長	澎安琪	許芳華				
+OPD	護理長	郭富美	李美慧				
+OR	護理長	黃代泱	李怡珍				
+CSR	護理長	陳韋如	李怡珍				
+3BI-Ⅰ	護理長	郭惠婷	柯雅婷				
+3BI-Ⅱ	護理長	許家蓁	柯雅婷				
+3CI	護理長	楊濘綺	柯雅婷				
+4A	護理長	王靜慧	徐富美				
+BR	護理長	呂佳蓁	徐富美				
+4AI	護理長	陶菁	徐富美				
+4BI	護理長	張明娟	柯雅婷				
+HR	護理長	黃惠暄	李美慧				
+Burn	護理長	杜雅惠	柯雅婷				
+5A	護理長	謝靜文	王維那				
+5B	護理長	鄭君婷	徐富美				
+5CI	護理長	許瑜玲	柯雅婷				
+TC	護理長	施皇任	林琪馨				
+6A	護理長	楊宜靜	王維那				
+6B	護理長	周敏怡	王維那				
+6BI	護理長	章正俐	柯雅婷				
+7A	護理長	李玉媚	王維那				
+7B	護理長	陳俞君	王維那				
+8A	護理長	李芷宜	許芳華				
+8B	護理長	張靜倫	許芳華				
+8C	護理長	陳岳君	林琪馨				
+9A	護理長	楊禮謙	許芳華				
+9B	護理長	魏嘉慧	王維那				
+10A	護理長	廖麗怡	王維那				
+10B	護理長	葉筱鳳	許芳華				
+RCC	護理長	蘇敬惠	柯雅婷				
+12A	護理長	陳淑娟	許芳華				
+12B	護理長	周珊珊	許芳華				
+HC	護理長	陳惠滿	林琪馨				
+PSY	護理長	陳欣懇	李美慧				
+台積電	護理長	林淑惠	李美慧				
+ER	副護理長	林筱茵	許芳華	澎安琪			
+ER	副護理長	吳柏勳	許芳華	澎安琪			
+ER	副護理長	邱怡菁	許芳華	澎安琪			
+OPD	副護理長	吳佩珊	李美慧	郭富美			
+OPD	副護理長	李清香	李美慧	郭富美			
+OR	副護理長	柯靜津	李怡珍	黃代泱			
+OR	副護理長	莊阿月	李怡珍	黃代泱			
+OR	副護理長	王桂櫻	李怡珍	黃代泱			
+OR	副護理長	李嘉臻	李怡珍	黃代泱			
+CSR	副護理長	林青霞	李怡珍	陳韋如			
+CSR	副護理長	蔡幸紋	李怡珍	陳韋如			
+3BI-Ⅰ	副護理長	陳鄉尹	柯雅婷	郭惠婷			
+3BI-Ⅱ	副護理長	劉佳禎	柯雅婷	許家蓁			
+3BI-Ⅱ	副護理長	謝佳妏	柯雅婷	許家蓁			
+3CI	副護理長	陳柏翰	柯雅婷	楊濘綺			
+DR	副護理長	盧怡萍	徐富美	王靜慧			
+4AI	副護理長	蔡宛菁	徐富美	陶菁			
+HR	副護理長	葉美鈴	李美慧	黃惠暄			
+HR	副護理長	陳?湄	李美慧	黃惠暄			
+4BI	副護理長	鄭淑華	柯雅婷	張明娟			
+4BI	副護理長	邱美娟	柯雅婷	張明娟			
+5A	副護理長	劉思汝	王維那	謝靜文			
+5A	副護理長	林莞潔	王維那	謝靜文			
+5CI	副護理長	洪玉玲	柯雅婷	許瑜玲			
+6A	副護理長	張雅婷	王維那	楊宜靜			
+6A	副護理長	黃喬伶	王維那	楊宜靜			
+TC	副護理長	魏晶婷	林琪馨	施皇任			
+6B	副護理長	林虹汶	王維那	周敏怡			
+6BI	副護理長	林岢臻	柯雅婷	章正俐			
+6BI	副護理長	謝坤男	柯雅婷	章正俐			
+7A	副護理長	張嘉奇	王維那	李玉媚			
+7B	副護理長	李麗華	王維那	陳俞君			
+8A	副護理長	林翔宇	許芳華	李芷宜			
+8C	副護理長	魏妙芬	林琪馨	陳岳君			
+8C	副護理長	黃貞瑗	林琪馨	陳岳君			
+9A	副護理長	王秀玲	許芳華	楊禮謙			
+9A	副護理長	楊婷雅	許芳華	楊禮謙			
+9B	副護理長	林雅萍	王維那	魏嘉慧			
+10B	副護理長	陳佳婉	許芳華	葉筱鳳			
+12A	副護理長	謝淑娟	許芳華	陳淑娟			
+RCC	副護理長	舒伊敏	柯雅婷	蘇敬惠			
+ER	小組長	劉淑娟	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	張惠茹	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	朱宜鳳	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	白佳玉	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	許惠靜	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	楊雅君	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	沈怡穎	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	邱小鳳	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	顧素真	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	陳砡寶	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	李曉萍	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	董雅華	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	趙子慧	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	王怡靜	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	嚴逸屏	澎安琪	林筱茵	吳柏勳	邱怡菁	
+ER	小組長	謝昀霖	澎安琪	林筱茵	吳柏勳	邱怡菁	
+OPD	小組長	胡淑萍	郭富美	吳佩珊	李清香		
+OPD	小組長	劉心倩	郭富美	吳佩珊	李清香		
+OPD	小組長	林淑美	郭富美	吳佩珊	李清香		
+OPD	小組長	蔡素蕊	郭富美	吳佩珊	李清香		
+OPD	小組長	劉育甄	郭富美	吳佩珊	李清香		
+OR	小組長	王麗卿	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	利孟蓉	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	張秀鳳	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	李菊華	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	邱梅琳	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	郭小碧	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	楊思惠	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	李月晶	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	王雅芳	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	楊純佩	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	陳振福	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	怡君	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+OR	小組長	溫惠萍	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
+CSR	小組長	吳佳蓉	陳韋如	林青霞	蔡幸紋		
+3BI-Ⅰ	小組長	趙曉梅	郭惠婷	陳鄉尹			
+3BI-Ⅰ	小組長	宋易穎	郭惠婷	陳鄉尹			
+3BI-Ⅰ	小組長	張俐娟	郭惠婷	陳鄉尹			
+3BI-Ⅰ	小組長	林蓬如	郭惠婷	陳鄉尹			
+3BI-Ⅰ	小組長	王郁婷	郭惠婷	陳鄉尹			
+3BI-Ⅱ	小組長	柯欣慧	許家蓁	劉佳禎	謝佳妏		
+3BI-Ⅱ	小組長	林毓涵	許家蓁	劉佳禎	謝佳妏		
+3BI-Ⅱ	小組長	洪瑋翎	許家蓁	劉佳禎	謝佳妏		
+3BI-Ⅱ	小組長	曾莉淳	許家蓁	劉佳禎	謝佳妏		
+3BI-Ⅱ	小組長	何雅惠	許家蓁	劉佳禎	謝佳妏		
+3CI	小組長	謝玫君	楊濘綺	陳柏翰			
+3CI	小組長	賴韻如	楊濘綺	陳柏翰			
+3CI	小組長	張怡蓁	楊濘綺	陳柏翰			
+4A	小組長	吳翊禎	王靜慧				
+4A	小組長	王儷蓉	王靜慧				
+4A	小組長	農蕙芬	王靜慧				
+DR	小組長	宋玫伶	王靜慧	盧怡萍			
+DR	小組長	邱惠如	王靜慧	盧怡萍			
+DR	小組長	李瓊如	王靜慧	盧怡萍			
+DR	小組長	韓柏庭	王靜慧	盧怡萍			
+BR	小組長	李慈蓉	呂佳蓁				
+病嬰室	小組長	郭秀慧	呂佳蓁				
+病嬰室	小組長	陳乃瑗	呂佳蓁				
+病嬰室	小組長	陳雅君	呂佳蓁				
+病嬰室	小組長	林佳慧	呂佳蓁				
+病嬰室	小組長	陳鈴資	呂佳蓁				
+4AI	小組長	李惠綾	陶菁	蔡宛菁			
+4AI	小組長	劉俐均	陶菁	蔡宛菁			
+4AI	小組長	李岱芳	陶菁	蔡宛菁			
+4AI	小組長	廖梅菁	陶菁	蔡宛菁			
+4AI	小組長	丁祖珍	陶菁	蔡宛菁			
+4AI	小組長	陳怡	陶菁	蔡宛菁			
+4AI	小組長	呂和容	陶菁	蔡宛菁			
+4BI	小組長	張伊雯	張明娟	鄭淑華	邱美娟		
+4BI	小組長	邱筱鈞	張明娟	鄭淑華	邱美娟		
+4BI	小組長	陳若曦	張明娟	鄭淑華	邱美娟		
+4BI	小組長	蕭百雯	張明娟	鄭淑華	邱美娟		
+4BI	小組長	陳豌華	張明娟	鄭淑華	邱美娟		
+4BI	小組長	邱昱瑄	張明娟	鄭淑華	邱美娟		
+4BI	小組長	蘇郁婷	張明娟	鄭淑華	邱美娟		
+4BI	小組長	張芝姍	張明娟	鄭淑華	邱美娟		
+4BI	小組長	王政凱	張明娟	鄭淑華	邱美娟		
+Burn	小組長	林秀苓	杜雅惠				
+Burn	小組長	林宜葳	杜雅惠				
+Burn	小組長	林姿妤	杜雅惠				
+Burn	小組長	楊青樺	杜雅惠				
+Burn	小組長	郭芳伶	杜雅惠				
+HR	小組長	林莊秋萍	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	賴秀芬	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	戴雅芳	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	鄭秋婷	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	邱雅蘭	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	郭雅雯	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	吳佩樺	黃惠暄	葉美鈴	陳?湄		
+HR	小組長	莊佩勳	黃惠暄	葉美鈴	陳?湄		
+PD	小組長	盧淑貞	黃惠暄				
+5A	小組長	蔡瑋芬	謝靜文	劉思汝	林莞潔		
+5A	小組長	蘇偉安	謝靜文	劉思汝	林莞潔		
+5A	小組長	黃翠吟	謝靜文	劉思汝	林莞潔		
+5A	小組長	許娟	謝靜文	劉思汝	林莞潔		
+5A	小組長	許雯婷	謝靜文	劉思汝	林莞潔		
+5A	小組長	謝蕙青	謝靜文	劉思汝	林莞潔		
+5A	小組長	黃棱	謝靜文	劉思汝	林莞潔		
+5A	小組長	陳亭伊	謝靜文	劉思汝	林莞潔		
+5B	小組長	侯芬芳	鄭君婷				
+5B	小組長	廖秋惠	鄭君婷				
+5B	小組長	吳頌誼	鄭君婷				
+5B	小組長	張淑儀	鄭君婷				
+5CI	小組長	陳梅斐	許瑜玲	洪玉玲			
+5CI	小組長	翁慧君	許瑜玲	洪玉玲			
+5CI	小組長	陳靜宜	許瑜玲	洪玉玲			
+5CI	小組長	蔡佩云	許瑜玲	洪玉玲			
+5CI	小組長	林佩君	許瑜玲	洪玉玲			
+5CI	小組長	張富雅	許瑜玲	洪玉玲			
+6A	小組長	黃琬婷	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	陳怡君	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	黃郁雯	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	蘇致穎	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	謝佳君	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	郭淑萍	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	詹璧甄	楊宜靜	張雅婷	黃喬伶		
+6A	小組長	吳佳玲	楊宜靜	張雅婷	黃喬伶		
+TC	小組長	蕭茜文	施皇任	魏晶婷			
+6B	小組長	陳怡秀	周敏怡	林虹汶			
+6B	小組長	莊素雲	周敏怡	林虹汶			
+6B	小組長	黃亭尹	周敏怡	林虹汶			
+6B	小組長	陳韋安	周敏怡	林虹汶			
+6B	小組長	謝淑玲	周敏怡	林虹汶			
+6BI	小組長	連淑宜	章正俐	林岢臻	謝坤男		
+6BI	小組長	戴碧卿	章正俐	林岢臻	謝坤男		
+6BI	小組長	黃馨宜	章正俐	林岢臻	謝坤男		
+6BI	小組長	陳怡婷	章正俐	林岢臻	謝坤男		
+6BI	小組長	陳雲萍	章正俐	林岢臻	謝坤男		
+6BI	小組長	郭廷鍇	章正俐	林岢臻	謝坤男		
+6BI	小組長	吳宛如	章正俐	林岢臻	謝坤男		
+6BI	小組長	陳巧雲	章正俐	林岢臻	謝坤男		
+6BI	小組長	李柏志	章正俐	林岢臻	謝坤男		
+7A	小組長	周怡禎	李玉媚	張嘉奇			
+7A	小組長	程維平	李玉媚	張嘉奇			
+7A	小組長	自動篩選	李玉媚	張嘉奇			
+7A	小組長	王珈雯	李玉媚	張嘉奇			
+7A	小組長	林盈萱	李玉媚	張嘉奇			
+7A	小組長	洪翊庭	李玉媚	張嘉奇			
+7A	小組長	沈錦菱	李玉媚	張嘉奇			
+7A	小組長	簡珮靖	李玉媚	張嘉奇			
+7B	小組長	溫秋萍	陳俞君	李麗華			
+7B	小組長	王羿茹	陳俞君	李麗華			
+7B	小組長	陳柍圻	陳俞君	李麗華			
+7B	小組長	蔡嘉慧	陳俞君	李麗華			
+7B	小組長	林永樺	陳俞君	李麗華			
+7B	小組長	莊佩華	陳俞君	李麗華			
+8A	小組長	楊筱宇	李芷宜	林翔宇			
+8A	小組長	許桂禎	李芷宜	林翔宇			
+8A	小組長	陳柔安	李芷宜	林翔宇			
+8A	小組長	戴怡珍	李芷宜	林翔宇			
+8A	小組長	曾雅玲	李芷宜	林翔宇			
+8A	小組長	葉家華	李芷宜	林翔宇			
+8A	小組長	林雨璇	李芷宜	林翔宇			
+8A	小組長	朱雅琳	李芷宜	林翔宇			
+8A	小組長	李淑瑛	李芷宜	林翔宇			
+8A	小組長	楊佳純	李芷宜	林翔宇			
+8B	小組長	廖庭毅	張靜倫				
+8B	小組長	歐千瑜	張靜倫				
+8B	小組長	么郁卉	張靜倫				
+8B	小組長	鄭君秀	張靜倫				
+8B	小組長	張文甄	張靜倫				
+8C	小組長	廖怡菁	陳岳君	黃貞瑗	魏妙芬		
+8C	小組長	張靉卿	陳岳君	黃貞瑗	魏妙芬		
+8C	小組長	王麗淑	陳岳君	黃貞瑗	魏妙芬		
+8C	小組長	杜文綺	陳岳君	黃貞瑗	魏妙芬		
+8C	小組長	林靖瑜	陳岳君	黃貞瑗	魏妙芬		
+8C	小組長	陳依靜	陳岳君	黃貞瑗	魏妙芬		
+9A	小組長	黃乃令	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	劉靜韻	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	林佳穎	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	呂湘凌	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	黃琬珺	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	楊秀佩	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	林吟璇	楊禮謙	王秀玲	楊婷雅		
+9A	小組長	曾千華	楊禮謙	王秀玲	楊婷雅		
+9B	小組長	黃惠琪	魏嘉慧	林雅萍			
+9B	小組長	翁立豪	魏嘉慧	林雅萍			
+9B	小組長	林郁娟	魏嘉慧	林雅萍			
+9B	小組長	鄭妃吟	魏嘉慧	林雅萍			
+9B	小組長	何沛璇	魏嘉慧	林雅萍			
+9B	小組長	鄭微蓁	魏嘉慧	林雅萍			
+10A	小組長	黃怡庭	廖麗怡				
+10A	小組長	陳怡伶	廖麗怡				
+10A	小組長	詹婉渝	廖麗怡				
+10A	小組長	陳湘琳	廖麗怡				
+10B	小組長	李佳珍	葉筱鳳	陳佳婉			
+10B	小組長	蔡芳怡	葉筱鳳	陳佳婉			
+10B	小組長	陳怡璁	葉筱鳳	陳佳婉			
+10B	小組長	何欣樺	葉筱鳳	陳佳婉			
+10B	小組長	翁鈺期	葉筱鳳	陳佳婉			
+10B	小組長	王羿云	葉筱鳳	陳佳婉			
+12A	小組長	高汝珍	陳淑娟	謝淑娟			
+12A	小組長	莊佩樺	陳淑娟	謝淑娟			
+12A	小組長	陳佳敏	陳淑娟	謝淑娟			
+12A	小組長	馮惠雅	陳淑娟	謝淑娟			
+12B	小組長	葉曉雯	周珊珊				
+12B	小組長	陳姿穎	周珊珊				
+12B	小組長	盧佩瑩	周珊珊				
+12B	小組長	王藝蓁	周珊珊				
+PSY	小組長	鄭殷甄	陳欣懇				
+PSY	小組長	林懿弘	陳欣懇				
+PSY	小組長	王苡禎	陳欣懇				
+PSY	小組長	黃雅琪	陳欣懇				
+PSY	小組長	蔡昱潔	陳欣懇				
+PSY	小組長	楊雅萍	陳欣懇				
+RCC	小組長	楊惠晶	蘇敬惠	舒伊敏			
+RCC	小組長	洪絜昕	蘇敬惠	舒伊敏			
+RCC	小組長	陳思棠	蘇敬惠	舒伊敏			
+RCC	小組長	洪暄惠	蘇敬惠	舒伊敏			
+RCC	小組長	楊凱婷	蘇敬惠	舒伊敏			
+HC	小組長	盧怡利	陳惠滿				
+日間照顧中心	小組長	呂佳惠					
+社區整合	小組長	蘇文義					`;
+
+        // 用於存放動態解析後的名單與對應關係
+        const targetList = [];
+        const evaluatorMapping = [];
+
+        // 本次填答數據暫存
+        let surveyAnswers = {};
+        let surveyComments = {};
+        let myRadarChart = null;
+
+        function parseRosterAndBuildDatabase() {
+            const lines = RAW_ROSTER.trim().split('\n');
+            const personLookup = {};
+            
+            // 第一次遍歷：註冊名單中所有人的科室與職稱
+            lines.forEach(line => {
+                const cols = line.split(/\t/).map(c => c.trim());
+                if (cols.length < 3) return;
+                
+                const unit = cols[0];
+                const title = cols[1];
+                const name = cols[2];
+                
+                if (name) {
+                    personLookup[name] = { unit, title };
+                    targetList.push({
+                        id: 'T' + targetList.length,
+                        name: name,
+                        unit: unit,
+                        title: title
+                    });
+                }
+            });
+
+            // 註冊直屬督導名單
+            const knownSupervisors = ["許芳華", "李美慧", "李怡珍", "柯雅婷", "徐富美", "王維那", "林琪馨"];
+            knownSupervisors.forEach(sup => {
+                if (!personLookup[sup]) {
+                    personLookup[sup] = { unit: "護理部", title: "督導" };
+                }
+            });
+
+            // 第二次遍歷：解析每位受評人的「他評者們」與對應關係
+            lines.forEach(line => {
+                const cols = line.split(/\t/).map(c => c.trim());
+                if (cols.length < 3) return;
+                
+                const targetUnit = cols[0];
+                const targetTitle = cols[1];
+                const targetName = cols[2];
+                if (!targetName) return;
+
+                // 評核者分佈在第 3 欄之後
+                for (let i = 3; i < cols.length; i++) {
+                    const evalName = cols[i];
+                    if (!evalName) continue;
+
+                    let evalUnit = targetUnit; 
+                    let evalTitle = "副護理長"; 
+                    let relation = "直屬主管";
+
+                    if (personLookup[evalName]) {
+                        evalUnit = personLookup[evalName].unit;
+                        evalTitle = personLookup[evalName].title;
+                    } else {
+                        if (knownSupervisors.includes(evalName)) {
+                            evalUnit = "護理部";
+                            evalTitle = "督導";
+                        }
+                    }
+
+                    // 智慧判定職級關係
+                    if (evalTitle === "督導") {
+                        relation = "直屬督導";
+                    } else if (evalTitle === "護理長" && targetTitle !== "護理長") {
+                        relation = "直屬護理長";
+                    } else if (evalTitle === "副護理長" && targetTitle === "小組長") {
+                        relation = "直屬副護理長";
+                    } else if (evalTitle === targetTitle) {
+                        relation = "同儕主管";
+                    } else {
+                        relation = "臨床評估人";
+                    }
+
+                    evaluatorMapping.push({
+                        targetName: targetName,
+                        name: evalName,
+                        unit: evalUnit,
+                        title: evalTitle,
+                        relation: relation
+                    });
+                }
+            });
+        }
+
+        window.onload = function() {
+            parseRosterAndBuildDatabase();
+            document.getElementById('total-count').textContent = questions.length;
+            initTargetOptions();
+            toggleMode();
+            loadGasUrl(); // 載入儲存的 API 網址
+            
+            // 檢查快取中開發者模式是否已被開啟過，以決定預設狀態
+            const devModePref = localStorage.getItem('chimei_survey_dev_mode');
+            if (devModePref === 'true') {
+                toggleDevMode(true); // 顯式強制開啟
+            }
+        };
+
+        // 儲存與載入 GAS Web App 網址至瀏覽器快取 (LocalStorage)
+        function saveGasUrl() {
+            const url = document.getElementById('gasUrl').value.trim();
+            localStorage.setItem('chimei_survey_gas_url', url);
+        }
+
+        function loadGasUrl() {
+            const saved = localStorage.getItem('chimei_survey_gas_url');
+            if (saved) {
+                document.getElementById('gasUrl').value = saved;
+            }
+        }
+
+        // ⚙️ 系統開發者設定顯示切換函數
+        // 控制 class="dev-element" 的所有測試代碼與後台配置按鈕
+        function toggleDevMode(forceShow = false) {
+            const devElements = document.querySelectorAll('.dev-element');
+            devElements.forEach(el => {
+                if (forceShow) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.toggle('hidden');
+                }
+            });
+            
+            // 保存目前的開發者面板開啟喜好
+            if (devElements.length > 0) {
+                const isNowHidden = devElements[0].classList.contains('hidden');
+                localStorage.setItem('chimei_survey_dev_mode', isNowHidden ? 'false' : 'true');
+            }
+        }
+
+        // 智慧型後端 API 測試連線與自動診斷功能 (防避 CORS 誤報)
+        function testGasConnection() {
+            const gasUrl = document.getElementById('gasUrl').value.trim();
+            if (!gasUrl) {
+                showAlert("請先輸入您的 Google Apps Script 部署網址！");
+                return;
+            }
+
+            if (!gasUrl.includes("script.google.com/macros/s/") || !gasUrl.includes("/exec")) {
+                showAlert("🚨 網址格式不正確！\n\n請務必使用「網頁應用程式網址」，它必須以 /exec 結尾。如果您使用的是 /dev 網址，將無法正常在外部連線。");
+                return;
+            }
+
+            showAlert("正在與 Google 雲端進行握手連線測試，請稍候...");
+
+            // 使用 no-cors 模式發送，即使遭遇 CORS，只要 server 存在且有回應，請求就能順利 Resolve
+            fetch(gasUrl, { method: 'GET', mode: 'no-cors' })
+            .then(() => {
+                showAlert(
+                    "🎉 雲端伺服器連線成功！\n\n" +
+                    "偵測到您的 Google Apps Script 已上線！請點選下方連結確認是否能正確顯示運作文字：\n\n" +
+                    `👉 <a href="${gasUrl}" target="_blank" class="text-chimei-500 font-bold underline">點此直接打開後端確認頁面</a>\n\n` +
+                    "（只要打開後看到「正常運作中」的提示，代表部署 100% 成功，問卷即可開始填寫並即時存檔！）"
+                );
+            })
+            .catch(err => {
+                showAlert(
+                    "❌ 連線失敗！診斷報告如下：\n\n" +
+                    "這代表您的 Google Apps Script 後端可能有以下問題：\n" +
+                    "1. 部署權限錯誤：【誰可以存取】未設定為「任何人 (Anyone)」\n" +
+                    "2. 權限未核准：您未曾在編輯器中點選「執行」以授權試算表存取。\n" +
+                    "3. 網址無效：請確認複製的是最新部署的 Web App URL。\n\n" +
+                    `👉 <a href="${gasUrl}" target="_blank" class="text-rose-500 font-bold underline">點此開啟新分頁進行強制診斷</a>`
+                );
+            });
+        }
+
+        // 被評核者選單初始化
+        function initTargetOptions() {
+            const select = document.getElementById('targetName');
+            select.innerHTML = '<option value="">-- 請選擇被評核主管 --</option>';
+            targetList.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.name;
+                opt.textContent = `${item.name} (${item.unit} - ${item.title})`;
+                opt.dataset.unit = item.unit;
+                opt.dataset.title = item.title;
+                select.appendChild(opt);
+            });
+        }
+
+        function filterTargets() {
+            const keyword = document.getElementById('searchUnit').value.toLowerCase().trim();
+            const select = document.getElementById('targetName');
+            select.innerHTML = '<option value="">-- 請選擇被評核主管 --</option>';
+
+            const filtered = targetList.filter(item => {
+                return item.name.toLowerCase().includes(keyword) || 
+                       item.unit.toLowerCase().includes(keyword) || 
+                       item.title.toLowerCase().includes(keyword);
+            });
+
+            filtered.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.name;
+                opt.textContent = `${item.name} (${item.unit} - ${item.title})`;
+                opt.dataset.unit = item.unit;
+                opt.dataset.title = item.title;
+                select.appendChild(opt);
+            });
+
+            if (filtered.length === 1) {
+                select.selectedIndex = 1;
+            }
+            updateTargetInfo();
+        }
+
+        function updateTargetInfo() {
+            const select = document.getElementById('targetName');
+            const selectedOpt = select.options[select.selectedIndex];
+            
+            const targetUnitField = document.getElementById('targetUnit');
+            const targetTitleField = document.getElementById('targetTitle');
+
+            if (selectedOpt && selectedOpt.value) {
+                targetUnitField.value = selectedOpt.dataset.unit || '';
+                targetTitleField.value = selectedOpt.dataset.title || '';
+                populateEvaluatorOptions(selectedOpt.value);
+            } else {
+                targetUnitField.value = '';
+                targetTitleField.value = '';
+                
+                const evalSelect = document.getElementById('evaluatorName');
+                evalSelect.innerHTML = '<option value="">-- 請先選擇被評核人 --</option>';
+                clearEvaluatorInfo();
+            }
+        }
+
+        // 他評者名單選項連動生成
+        function populateEvaluatorOptions(targetName) {
+            const evalSelect = document.getElementById('evaluatorName');
+            evalSelect.innerHTML = '<option value="">-- 請選擇他評者姓名 --</option>';
+
+            const matches = evaluatorMapping.filter(m => m.targetName === targetName);
+            
+            if (matches.length > 0) {
+                matches.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.name;
+                    opt.textContent = m.name;
+                    opt.dataset.unit = m.unit;
+                    opt.dataset.title = m.title;
+                    opt.dataset.relation = m.relation;
+                    evalSelect.appendChild(opt);
+                });
+            } else {
+                evalSelect.innerHTML = '<option value="">-- 此主管查無預設他評 --</option>';
+            }
+            clearEvaluatorInfo();
+        }
+
+        function updateEvaluatorInfo() {
+            const select = document.getElementById('evaluatorName');
+            const opt = select.options[select.selectedIndex];
+
+            const evalUnitField = document.getElementById('evaluatorUnit');
+            const evalTitleField = document.getElementById('evaluatorTitle');
+            const evalRelationField = document.getElementById('evaluatorRelation');
+
+            if (opt && opt.value) {
+                evalUnitField.value = opt.dataset.unit || '';
+                evalTitleField.value = opt.dataset.title || '';
+                evalRelationField.value = opt.dataset.relation || '同儕關係';
+            } else {
+                clearEvaluatorInfo();
+            }
+        }
+
+        function clearEvaluatorInfo() {
+            document.getElementById('evaluatorUnit').value = '';
+            document.getElementById('evaluatorTitle').value = '';
+            document.getElementById('evaluatorRelation').value = '';
+        }
+
+        function toggleMode() {
+            const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
+            const evalBox = document.getElementById('evaluatorInfo');
+            const selfLabel = document.getElementById('modeSelfLabel');
+            const otherLabel = document.getElementById('modeOtherLabel');
+
+            if (isOther) {
+                evalBox.classList.remove('hidden');
+                otherLabel.className = "relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition border-chimei-500 bg-chimei-50/50 dark:bg-chimei-950/20 text-chimei-600 dark:text-chimei-400";
+                selfLabel.className = "relative flex items-center justify-center p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition text-slate-600 dark:text-slate-400";
+            } else {
+                evalBox.classList.add('hidden');
+                selfLabel.className = "relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition border-chimei-500 bg-chimei-50/50 dark:bg-chimei-950/20 text-chimei-600 dark:text-chimei-400";
+                otherLabel.className = "relative flex items-center justify-center p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition text-slate-600 dark:text-slate-400";
+            }
+        }
+
+        function goToStep2() {
+            const targetName = document.getElementById('targetName').value;
+            if (!targetName) {
+                showAlert("請選擇被評核的主管人員姓名。");
+                return;
+            }
+
+            const mode = document.querySelector('input[name="evalMode"]:checked').value;
+            if (mode === 'other') {
+                const evalName = document.getElementById('evaluatorName').value;
+                if (!evalName) {
+                    showAlert("他評模式下，請選擇進行評核的他評主管。");
+                    return;
+                }
+            }
+
+            renderQuestions();
+            updateProgressMetrics();
+
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            
+            document.getElementById('step-node-2').className = "w-10 h-10 rounded-full bg-chimei-500 text-white flex items-center justify-center font-semibold shadow-lg transition-all duration-300";
+            document.getElementById('progress-line').style.width = "50%";
+            window.scrollTo(0, 0);
+        }
+
+        function goToStep1() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            
+            document.getElementById('step-node-2').className = "w-10 h-10 rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 flex items-center justify-center font-semibold transition-all duration-300";
+            document.getElementById('progress-line').style.width = "0%";
+            window.scrollTo(0, 0);
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsList');
+            container.innerHTML = '';
+
+            questions.forEach(q => {
+                const card = document.createElement('div');
+                card.id = `q-card-${q.id}`;
+                card.className = "question-block bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 p-5 rounded-2xl shadow-sm hover:border-chimei-200 dark:hover:border-chimei-800 transition duration-150";
+                
+                const scoreSelected = surveyAnswers[q.id] || 0;
+                const commentText = surveyComments[q.id] || '';
+
+                let ratingButtons = '';
+                [5, 4, 3, 2, 1].forEach(score => {
+                    const scoreText = score === 5 ? '5分 (極為同意)' : score === 1 ? '1分 (非常不同意)' : `${score}分`;
+                    const isActive = scoreSelected === score;
+                    ratingButtons += `
+                        <button onclick="handleRating(${q.id}, ${score})" type="button" class="flex-1 py-3 text-xs md:text-sm font-semibold rounded-xl border-2 transition duration-200 ${
+                            isActive 
+                            ? 'border-chimei-500 bg-chimei-500 text-white shadow-md shadow-chimei-100 dark:shadow-none' 
+                            : 'border-slate-100 bg-slate-50 hover:bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:bg-slate-800 dark:text-slate-300'
+                        }">
+                            ${scoreText}
+                        </button>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="px-2.5 py-1 bg-chimei-50 dark:bg-chimei-900/30 text-chimei-600 dark:text-chimei-400 rounded-lg text-xs font-bold whitespace-nowrap mt-0.5">
+                            第 ${q.id} 題
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="text-slate-800 dark:text-slate-100 font-bold text-sm md:text-base leading-relaxed">
+                                <span class="text-chimei-500 dark:text-chimei-300 mr-1.5">[${q.cat} · ${q.sub}]</span>${q.text}
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
+                        ${ratingButtons}
+                    </div>
+
+                    <div id="reason-container-${q.id}" class="${scoreSelected > 0 && scoreSelected <= 3 ? 'block' : 'hidden'} mt-4 p-4 rounded-xl bg-rose-50/50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/20 transition-all duration-300">
+                        <label for="comment-${q.id}" class="block text-xs font-bold text-rose-600 dark:text-rose-400 mb-2">
+                            <i class="fa-solid fa-circle-question mr-1"></i> 您給予了 3分(含) 以下之評估，請簡述您的原因或輔導具體建議： <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea id="comment-${q.id}" oninput="handleCommentChange(${q.id}, this.value)" rows="2" class="w-full text-xs md:text-sm px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none transition" placeholder="請寫入具體臨床情境或建議...">${commentText}</textarea>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updateProgressMetrics();
+        }
+
+        function handleRating(qId, score) {
+            surveyAnswers[qId] = score;
+
+            const reasonBox = document.getElementById(`reason-container-${qId}`);
+            if (score <= 3) {
+                reasonBox.classList.remove('hidden');
+            } else {
+                reasonBox.classList.add('hidden');
+                if (surveyComments[qId]) {
+                    delete surveyComments[qId];
+                    const commentArea = document.getElementById(`comment-${qId}`);
+                    if (commentArea) commentArea.value = '';
+                }
+            }
+            renderQuestions();
+        }
+
+        function handleCommentChange(qId, val) {
+            surveyComments[qId] = val;
+        }
+
+        function updateProgressMetrics() {
+            let answered = 0;
+            let lowScoreWithoutReason = 0;
+
+            questions.forEach(q => {
+                if (surveyAnswers[q.id]) {
+                    answered++;
+                    if (surveyAnswers[q.id] <= 3 && (!surveyComments[q.id] || surveyComments[q.id].trim() === '')) {
+                        lowScoreWithoutReason++;
+                    }
+                }
+            });
+
+            document.getElementById('answered-count').textContent = answered;
+            
+            const pct = Math.round((answered / questions.length) * 100);
+            document.getElementById('progress-percent').textContent = `${pct}%`;
+            document.getElementById('survey-inner-progress').style.width = `${pct}%`;
+
+            const unansweredCount = questions.length - answered;
+            document.getElementById('unanswered-badge').textContent = unansweredCount;
+            document.getElementById('lowscore-badge').textContent = lowScoreWithoutReason;
+        }
+
+        function filterQuestions(filterType) {
+            const btns = {
+                all: document.getElementById('filter-all'),
+                unanswered: document.getElementById('filter-unanswered'),
+                lowScore: document.getElementById('filter-low')
+            };
+
+            for (let key in btns) {
+                if (key === filterType) {
+                    btns[key].className = "px-2.5 py-1 text-xs font-medium rounded-md bg-chimei-500 text-white transition shadow-sm";
+                } else {
+                    btns[key].className = "px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition";
+                }
+            }
+
+            questions.forEach(q => {
+                const card = document.getElementById(`q-card-${q.id}`);
+                const answer = surveyAnswers[q.id];
+                
+                if (filterType === 'all') {
+                    card.classList.remove('hidden');
+                } else if (filterType === 'unanswered') {
+                    if (answer) {
+                        card.classList.add('hidden');
+                    } else {
+                        card.classList.remove('hidden');
+                    }
+                } else if (filterType === 'lowScore') {
+                    if (answer && answer <= 3) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        // 隨機填答 (Demo 專用) - 已被 class="dev-element hidden" 包裹
+        function autoFillSurvey() {
+            questions.forEach(q => {
+                const r = Math.random();
+                let score = 5;
+                if (r < 0.2) score = 4;
+                else if (r < 0.3) score = 3;
+                else if (r < 0.35) score = 2;
+                
+                surveyAnswers[q.id] = score;
+
+                if (score <= 3) {
+                    surveyComments[q.id] = `針對臨床指標[${q.cat}-${q.sub}]主管可多加提攜與提供回饋、精進相關工作流程。`;
+                }
+            });
+            renderQuestions();
+            showAlert("已隨機模擬填答數據！所有題項均已填妥。");
+        }
+
+        // 一鍵填寫並直接跳轉至分析頁 - 已被 class="dev-element hidden" 包裹
+        function quickFillDemoAndNavigate() {
+            const targetSelect = document.getElementById('targetName');
+            if (!targetSelect.value) {
+                targetSelect.selectedIndex = Math.floor(Math.random() * (targetSelect.options.length - 1)) + 1;
+                updateTargetInfo();
+            }
+
+            const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
+            if (isOther) {
+                const evalSelect = document.getElementById('evaluatorName');
+                if (!evalSelect.value && evalSelect.options.length > 1) {
+                    evalSelect.selectedIndex = 1;
+                    updateEvaluatorInfo();
+                }
+            }
+
+            autoFillSurvey();
+            goToStep2();
+        }
+
+        // 提交問卷並上傳雲端試算表 (支援與 CORS + redirect 優化後端寫入)
+        function submitSurvey() {
+            let unanswered = [];
+            let lowScoreNoComment = [];
+
+            questions.forEach(q => {
+                const ans = surveyAnswers[q.id];
+                if (!ans) {
+                    unanswered.push(q.id);
+                } else if (ans <= 3 && (!surveyComments[q.id] || surveyComments[q.id].trim() === '')) {
+                    lowScoreNoComment.push(q.id);
+                }
+            });
+
+            if (unanswered.length > 0) {
+                filterQuestions('unanswered');
+                showAlert(`尚有 ${unanswered.length} 題未填寫！系統已為您過濾顯示，請填完再行提交。`);
+                return;
+            }
+
+            if (lowScoreNoComment.length > 0) {
+                filterQuestions('lowScore');
+                showAlert(`有 ${lowScoreNoComment.length} 個指標給予 1-3分 卻未說明具體原因與改善建議，請填寫備註。`);
+                return;
+            }
+
+            const domainScores = calculateDomainScores();
+            compileSpreadsheetPayload(domainScores);
+            
+            const gasUrl = document.getElementById('gasUrl').value.trim() || 'https://script.google.com/macros/s/AKfycbwvyhNn-F3T_2Sy1gUCkU1MzV7McblSaJYQwbRVo78pARgaSVootfONkcLaUEiTKp3A/exec';
+            const payloadData = JSON.parse(document.getElementById('json-payload').textContent);
+
+            if (gasUrl) {
+                // 顯示寫入中遮罩
+                const loader = document.getElementById('loading-overlay');
+                loader.classList.remove('opacity-0', 'pointer-events-none');
+
+                // 核心傳輸模式：啟用 CORS 模式並追蹤 Google 的安全網址重定向
+                fetch(gasUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    redirect: 'follow',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(payloadData)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return { result: "success" };
+                    }
+                    throw new Error('CORS 或連線錯誤');
+                })
+                .then(() => {
+                    loader.classList.add('opacity-0', 'pointer-events-none');
+                    transitionToAnalysisStep(domainScores);
+                    showAlert("評核資料已實時上傳並寫入您的 Google 試算表！已為您產生本地分析儀表板。");
+                })
+                .catch(err => {
+                    loader.classList.add('opacity-0', 'pointer-events-none');
+                    transitionToAnalysisStep(domainScores);
+                    showAlert("資料已於本機完成分析，但試算表寫入失敗：" + err.message + "\n\n(提示：若後端未建立新部署版本，可能導致資料無法順利存入)");
+                });
+            } else {
+                transitionToAnalysisStep(domainScores);
+                showAlert("本機分析編譯完成！(提示：您尚未配置 Google Apps Script 網址，故資料僅儲存在本機，未同步至雲端試算表)");
+            }
+        }
+
+        function transitionToAnalysisStep(domainScores) {
+            // 更新列印報表專屬中繼資料
+            const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
+            const targetName = document.getElementById('targetName').value;
+            const targetUnit = document.getElementById('targetUnit').value;
+            const targetTitle = document.getElementById('targetTitle').value;
+            const evalYear = document.getElementById('evalYear').value;
+
+            document.getElementById('print-target-meta').textContent = `${targetName} (${targetUnit} - ${targetTitle})`;
+            document.getElementById('print-year-meta').textContent = `${evalYear}年度`;
+            document.getElementById('print-mode-meta').textContent = isOther ? "他評模式" : "自評模式";
+            
+            if (isOther) {
+                const evalName = document.getElementById('evaluatorName').value;
+                const evalUnit = document.getElementById('evaluatorUnit').value;
+                const evalTitle = document.getElementById('evaluatorTitle').value;
+                const evalRelation = document.getElementById('evaluatorRelation').value;
+                
+                document.getElementById('print-evaluator-meta').textContent = `${evalName} (${evalUnit} - ${evalTitle})`;
+                document.getElementById('print-relation-meta').textContent = evalRelation;
+            } else {
+                document.getElementById('print-evaluator-meta').textContent = "無 (自評模式)";
+                document.getElementById('print-relation-meta').textContent = "本人自主評估";
+            }
+
+            document.getElementById('print-time-meta').textContent = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+
+            buildRadarChart(domainScores);
+            buildAdvantageAndDisadvantageLists(domainScores);
+            buildCommentsList();
+
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+
+            document.getElementById('step-node-3').className = "w-10 h-10 rounded-full bg-chimei-500 text-white flex items-center justify-center font-semibold shadow-lg transition-all duration-300";
+            document.getElementById('progress-line').style.width = "100%";
+            window.scrollTo(0, 0);
+        }
+
+        function calculateDomainScores() {
+            const domainConfig = {
+                "專業力": [1, 2, 3, 4],
+                "彈性力": [5, 6],
+                "溝通力": [7, 8],
+                "領導力": [9, 10],
+                "決策力": [11, 12],
+                "培育力": [13, 14],
+                "創新力": [15, 16],
+                "關懷力": [17, 18],
+                "執行力": [19, 20],
+                "協同力": [21, 22]
+            };
+
+            let scores = {};
+            for (let name in domainConfig) {
+                const ids = domainConfig[name];
+                let sum = 0;
+                ids.forEach(id => {
+                    sum += surveyAnswers[id] || 0;
+                });
+                scores[name] = parseFloat((sum / ids.length).toFixed(2));
+            }
+            return scores;
+        }
+
+        function buildRadarChart(domainScores) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            const labels = Object.keys(domainScores);
+            const dataValues = Object.values(domainScores);
+
+            if (myRadarChart) {
+                myRadarChart.destroy();
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
+            const labelColor = isDark ? '#cbd5e1' : '#334155';
+
+            myRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '評核指標得分',
+                        data: dataValues,
+                        backgroundColor: 'rgba(0, 125, 101, 0.2)', 
+                        borderColor: '#007d65', 
+                        borderWidth: 2,
+                        pointBackgroundColor: '#007d65',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#007d65'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: gridColor
+                            },
+                            grid: {
+                                color: gridColor
+                            },
+                            pointLabels: {
+                                color: labelColor,
+                                font: {
+                                    size: 11,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                backdropColor: 'transparent',
+                                color: labelColor,
+                                showLabelBackdrop: false
+                            },
+                            min: 0,
+                            max: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // 生成優點與待精進指標清單
+        function buildAdvantageAndDisadvantageLists(domainScores) {
+            const sortedDomains = Object.keys(domainScores).map(name => {
+                return { name: name, score: domainScores[name] };
+            }).sort((a, b) => b.score - a.score);
+
+            const strongContainer = document.getElementById('strong-domains');
+            const weakContainer = document.getElementById('weak-domains');
+
+            strongContainer.innerHTML = '';
+            weakContainer.innerHTML = '';
+
+            const strongs = sortedDomains.slice(0, 2);
+            strongs.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/30 px-4 py-3 rounded-xl";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 font-bold"></i>
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${item.name}</span>
+                    </div>
+                    <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.score} / 5.0</span>
+                `;
+                strongContainer.appendChild(div);
+            });
+
+            const weaks = sortedDomains.slice(-2).reverse();
+            weaks.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-rose-50/40 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 px-4 py-3 rounded-xl";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-xmark text-rose-500 font-bold"></i>
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${item.name}</span>
+                    </div>
+                    <span class="text-xs font-black text-rose-600 dark:text-rose-400">${item.score} / 5.0</span>
+                `;
+                weakContainer.appendChild(div);
+            });
+        }
+
+        // 生成低評分改進原因彙整
+        function buildCommentsList() {
+            const commentContainer = document.getElementById('comments-summary');
+            commentContainer.innerHTML = '';
+
+            let hasComment = false;
+            questions.forEach(q => {
+                const comment = surveyComments[q.id];
+                if (comment && comment.trim() !== '') {
+                    hasComment = true;
+                    const div = document.createElement('div');
+                    div.className = "bg-slate-50 dark:bg-slate-900/40 border border-slate-150 dark:border-slate-700 p-3 rounded-lg";
+                    div.innerHTML = `
+                        <div class="flex justify-between font-bold text-[11px] text-slate-500 dark:text-slate-400 mb-1">
+                            <span>第 ${q.id} 題 [${q.cat} - ${q.sub}]</span>
+                            <span class="text-rose-500 font-bold">得分：${surveyAnswers[q.id]}分</span>
+                        </div>
+                        <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">${comment}</p>
+                    `;
+                    commentContainer.appendChild(div);
+                }
+            });
+
+            if (!hasComment) {
+                commentContainer.innerHTML = `
+                    <div class="text-center py-6 text-slate-400">
+                        <i class="fa-solid fa-face-smile text-2xl mb-1.5 text-emerald-500"></i>
+                        <p>所有題項皆為 4分以上 滿意水準，無低評分需改善之原因。</p>
+                    </div>
+                `;
+            }
+        }
+
+        function compileSpreadsheetPayload(domainScores) {
+            const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
+            
+            let sum = 0;
+            questions.forEach(q => sum += surveyAnswers[q.id] || 0);
+            const totalAvg = parseFloat((sum / questions.length).toFixed(2));
+
+            const payload = {
+                "submitTime": new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
+                "evalYear": document.getElementById('evalYear').value + "年",
+                "evalMode": isOther ? "他評" : "自評",
+                "targetName": document.getElementById('targetName').value,
+                "targetUnit": document.getElementById('targetUnit').value,
+                "targetTitle": document.getElementById('targetTitle').value,
+                "evaluatorName": isOther ? document.getElementById('evaluatorName').value : "",
+                "evaluatorUnit": isOther ? document.getElementById('evaluatorUnit').value : "",
+                "evaluatorTitle": isOther ? document.getElementById('evaluatorTitle').value : "",
+                "evaluatorRelation": isOther ? document.getElementById('evaluatorRelation').value : "自評",
+                "totalAverage": totalAvg
+            };
+
+            for (let name in domainScores) {
+                payload[`score_${name}`] = domainScores[name];
+            }
+
+            questions.forEach(q => {
+                payload[`q${q.id}`] = surveyAnswers[q.id] || 0;
+                payload[`q${q.id}_comment`] = surveyComments[q.id] || "";
+            });
+
+            document.getElementById('json-payload').textContent = JSON.stringify(payload, null, 4);
+        }
+
+        function copyPayload() {
+            const payloadText = document.getElementById('json-payload').textContent;
+            const textEl = document.createElement('textarea');
+            textEl.value = payloadText;
+            document.body.appendChild(textEl);
+            textEl.select();
+            try {
+                document.execCommand('copy');
+                showAlert("一維平鋪 JSON 數據已成功複製到剪貼簿！可供調試與後台寫入。");
+            } catch (err) {
+                showAlert("複製失敗，請手動全選複製。");
+            }
+            document.body.removeChild(textEl);
+        }
+
+        function resetSurvey() {
+            surveyAnswers = {};
+            surveyComments = {};
+            
+            document.getElementById('targetName').selectedIndex = 0;
+            updateTargetInfo();
+            document.getElementById('searchUnit').value = '';
+
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+
+            document.getElementById('step-node-2').className = "w-10 h-10 rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 flex items-center justify-center font-semibold transition-all duration-300";
+            document.getElementById('step-node-3').className = "w-10 h-10 rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 flex items-center justify-center font-semibold transition-all duration-300";
+            document.getElementById('progress-line').style.width = "0%";
+            window.scrollTo(0, 0);
+        }
+
+        // 執行正式列印 / 存為 PDF 報表
+        function printFormalReport() {
+            // 1. 將動態 Canvas 轉為 Base64 靜態高解析度圖片，防範瀏覽器列印時圖表空白
+            const chartCanvas = document.getElementById('radarChart');
+            if (!chartCanvas) {
+                showAlert("🚨 找不到分析圖表，無法列印。");
+                return;
+            }
+            const chartImageBase64 = chartCanvas.toDataURL('image/png');
+
+            // 2. 獲取基本資訊與分析數據
+            const targetName = document.getElementById('targetName').value || '--';
+            const targetUnit = document.getElementById('targetUnit').value || '--';
+            const targetTitle = document.getElementById('targetTitle').value || '--';
+            const evalYear = document.getElementById('evalYear').value || '115';
+            const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
+            const evalModeText = isOther ? "他評模式" : "自評模式";
+            
+            let evaluatorText = "無 (自評模式)";
+            let relationText = "本人自主評估";
+            if (isOther) {
+                const evalName = document.getElementById('evaluatorName').value || '--';
+                const evalUnit = document.getElementById('evaluatorUnit').value || '--';
+                const evalTitle = document.getElementById('evaluatorTitle').value || '--';
+                evaluatorText = `${evalName} (${evalUnit} - ${evalTitle})`;
+                relationText = document.getElementById('evaluatorRelation').value || '直屬主管';
+            }
+            
+            const printTime = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+
+            // 3. 獲取報表核心分析結構
+            const strongHtml = document.getElementById('strong-domains').innerHTML;
+            const weakHtml = document.getElementById('weak-domains').innerHTML;
+            const commentsHtml = document.getElementById('comments-summary').innerHTML;
+
+            // 4. 開啟新視窗（避開 Iframe Sandbox 限制，確保 100% 成功列印）
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                showAlert("🚨 偵測到彈出視窗遭到瀏覽器封鎖！<br>請允許此網站開啟彈出視窗以完成 PDF 報表產出。");
+                return;
+            }
+
+            // 5. 寫入精緻的正式 A4 PDF 報表版型
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="zh-TW">
+                <head>
+                    <title>奇美醫院 - 護理主管「護理十力」核心素養評測分析報告</title>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+                        body {
+                            font-family: 'Noto Sans TC', sans-serif;
+                            background: #ffffff;
+                            color: #1e293b;
+                            padding: 40px;
+                        }
+                        @media print {
+                            body { padding: 0; margin: 0; font-size: 11pt; }
+                            .no-print { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body class="bg-white">
+                    <div class="max-w-4xl mx-auto">
+                        <!-- 上方導航列（僅在畫面上顯示，列印時自動隱藏） -->
+                        <div class="no-print mb-6 p-4 bg-slate-100 rounded-xl flex justify-between items-center border border-slate-200">
+                            <span class="text-xs text-slate-600 font-bold">✨ 已為您建立專屬 PDF 格式化報表，請於右側直接儲存：</span>
+                            <button onclick="window.print();" class="px-5 py-2.5 bg-[#007d65] hover:bg-[#006652] text-white text-xs font-bold rounded-lg shadow-md transition">
+                                🖨️ 立即列印 / 另存為 PDF
+                            </button>
+                        </div>
+
+                        <!-- 報表官方抬頭 -->
+                        <div class="text-center border-b-2 border-slate-800 pb-4 mb-6">
+                            <h2 class="text-2xl font-black tracking-wide text-slate-900">奇美醫療財團法人奇美醫院</h2>
+                            <h3 class="text-lg font-bold text-slate-700 mt-1">護理主管「護理十力」核心素養評測分析報告</h3>
+                            
+                            <div class="grid grid-cols-2 gap-4 mt-6 text-left text-xs text-slate-650 border-t border-dashed border-slate-300 pt-3">
+                                <div>
+                                    <p class="mb-1"><strong>被評核主管：</strong><span>${targetName} (${targetUnit} - ${targetTitle})</span></p>
+                                    <p class="mb-1"><strong>評核年度：</strong><span>${evalYear}年度</span></p>
+                                    <p class="mb-1"><strong>評核模式：</strong><span>${evalModeText}</span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="mb-1"><strong>他評主管：</strong><span>${evaluatorText}</span></p>
+                                    <p class="mb-1"><strong>對應評估關係：</strong><span>${relationText}</span></p>
+                                    <p class="mb-1"><strong>報告產出時間：</strong><span>${printTime}</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 圖表與指標區 -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+                            <!-- 雷達圖 -->
+                            <div class="md:col-span-5 flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                                <h4 class="text-xs font-bold text-slate-700 mb-4 self-start">📊 主管護理十力分析圖 (雷達圖)</h4>
+                                <img src="${chartImageBase64}" class="w-full max-w-[260px] h-auto" alt="雷達圖" />
+                                <p class="text-[10px] text-slate-400 text-center mt-3">註：各能力滿分為 5.0。平均在 4.0 以上代表該項能力優異。</p>
+                            </div>
+
+                            <!-- 優優勢與弱勢能力指標 -->
+                            <div class="md:col-span-7 space-y-4">
+                                <div class="bg-white p-3 border border-slate-200 rounded-xl">
+                                    <h4 class="text-xs font-bold text-slate-800 mb-2">⭐ 核心優勢指標 (得分前 2 高)</h4>
+                                    <div class="space-y-2">${strongHtml}</div>
+                                </div>
+                                <div class="bg-white p-3 border border-slate-200 rounded-xl">
+                                    <h4 class="text-xs font-bold text-slate-800 mb-2">⚠️ 待精進能力指標 (得分後 2 低)</h4>
+                                    <div class="space-y-2">${weakHtml}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 建議與意見區 -->
+                        <div class="bg-white p-4 border border-slate-200 rounded-xl mb-8">
+                            <h4 class="text-xs font-bold text-slate-800 mb-3">💬 具體原因及輔導建議</h4>
+                            <div class="space-y-2 text-xs">${commentsHtml}</div>
+                        </div>
+
+                        <!-- 官方簽核欄位 -->
+                        <div class="grid grid-cols-3 gap-6 mt-12 border-t border-slate-300 pt-8 text-center text-xs text-slate-800 font-medium">
+                            <div class="flex flex-col justify-between h-24 border border-dashed border-slate-300 rounded-lg p-3">
+                                <span class="text-slate-500">被評核主管簽章</span>
+                                <span class="text-slate-300">蓋章/簽名處</span>
+                            </div>
+                            <div class="flex flex-col justify-between h-24 border border-dashed border-slate-300 rounded-lg p-3">
+                                <span class="text-slate-500">評核主管/督導簽章</span>
+                                <span class="text-slate-300">蓋章/簽名處</span>
+                            </div>
+                            <div class="flex flex-col justify-between h-24 border border-dashed border-slate-300 rounded-lg p-3">
+                                <span class="text-slate-500">護理部主任核章</span>
+                                <span class="text-slate-300">蓋章/核准處</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        // 頁面生成後自動喚起列印與存為 PDF
+                        window.onload = function() {
+                            setTimeout(function() {
+                                window.print();
+                            }, 500);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function exportCSV() {
+            const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
+            let headers = [
+                "提交時間", "評核年度", "評核模式", "被評核人姓名", "被評核人單位", "被評核人職稱",
+                "他評人姓名", "他評人單位", "他評人職稱", "與被評關係", "總平均分"
+            ];
+            
+            const domains = ["專業力", "彈性力", "溝通力", "領導力", "決策力", "培育力", "創新力", "關懷力", "執行力", "協同力"];
+            domains.forEach(d => headers.push(`核心分-${d}`));
+
+            questions.forEach(q => {
+                headers.push(`Q${q.id}分`);
+                headers.push(`Q${q.id}備註`);
+            });
+
+            const targetName = document.getElementById('targetName').value;
+            const targetUnit = document.getElementById('targetUnit').value;
+            const targetTitle = document.getElementById('targetTitle').value;
+            const evalName = isOther ? document.getElementById('evaluatorName').value : "";
+            const evalUnit = isOther ? document.getElementById('evaluatorUnit').value : "";
+            const evalTitle = isOther ? document.getElementById('evaluatorTitle').value : "";
+            const evalRelation = isOther ? document.getElementById('evaluatorRelation').value : "自評";
+            const evalYear = document.getElementById('evalYear').value + "年";
+
+            let sum = 0;
+            questions.forEach(q => sum += surveyAnswers[q.id] || 0);
+            const totalAvg = parseFloat((sum / questions.length).toFixed(2));
+            const domainScores = calculateDomainScores();
+
+            let rowData = [
+                new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }), evalYear, isOther ? "他評" : "自評", targetName, targetUnit, targetTitle,
+                evalName, evalUnit, evalTitle, evalRelation, totalAvg
+            ];
+
+            domains.forEach(d => rowData.push(domainScores[d]));
+
+            questions.forEach(q => {
+                rowData.push(surveyAnswers[q.id] || 0);
+                const comm = (surveyComments[q.id] || "").replace(/"/g, '""');
+                rowData.push(`"${comm}"`);
+            });
+
+            let csvContent = "\uFEFF"; 
+            csvContent += headers.join(",") + "\n";
+            csvContent += rowData.join(",") + "\n";
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `護理十力評核結果_${targetName}_${evalYear}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 自定義彈窗，美觀實用，符合主題
+        function showAlert(msg) {
+            document.getElementById('alert-message').innerHTML = msg.replace(/\n/g, '<br>');
+            const modal = document.getElementById('alert-modal');
+            const card = document.getElementById('alert-card');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-90');
+            card.classList.add('scale-100');
+        }
+
+        function closeAlert() {
+            const modal = document.getElementById('alert-modal');
+            const card = document.getElementById('alert-card');
+            
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-90');
+        }
+
+        // 暗黑模式控制
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            if (isDark) {
+                icon.className = "fa-solid fa-sun text-lg text-amber-400";
+            } else {
+                icon.className = "fa-solid fa-moon text-lg";
+            }
+            if (myRadarChart) {
+                const domainScores = calculateDomainScores();
+                buildRadarChart(domainScores);
+            }
+        }
+    </script>
+</body>
+</html>
