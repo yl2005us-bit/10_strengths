@@ -178,7 +178,7 @@
                     <i class="fa-solid fa-cloud-arrow-up mr-1.5 text-sm animate-pulse"></i> Google Apps Script 部署網址 (Web App URL) [測試與管理專用]
                 </label>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="gasUrl" class="flex-grow rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 outline-none transition" placeholder="https://script.google.com/macros/s/AKfycbwvyhNn-F3T_2Sy1gUCkU1MzV7McblSaJYQwbRVo78pARgaSVootfONkcLaUEiTKp3A/exec" oninput="saveGasUrl()">
+                    <input type="text" id="gasUrl" class="flex-grow rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 outline-none transition" placeholder="https://script.google.com/macros/s/AKfycbz7_7OYHnSyKDLatY2WbyffTtnwVEn0_sOeFjmqsKEuqDucUlc1mztymFNgnq_xg6fS/exec" oninput="saveGasUrl()">
                     <div class="flex gap-2 shrink-0">
                         <button type="button" onclick="testGasConnection()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition flex items-center shadow-sm">
                             <i class="fa-solid fa-plug mr-1.5 animate-pulse"></i> 測試連線
@@ -1057,19 +1057,40 @@ HC\t小組長\t盧怡利\t陳惠滿
             });
         }
 
-        window.onload = function() {
-            parseRosterAndBuildDatabase();
-            document.getElementById('total-count').textContent = questions.length;
-            initTargetOptions();
-            toggleMode();
-            loadGasUrl(); // 載入儲存的 API 網址
-            
-            // 檢查快取中開發者模式是否已被開啟過，以決定預設狀態
-            const devModePref = localStorage.getItem('chimei_survey_dev_mode');
-            if (devModePref === 'true') {
-                toggleDevMode(true); // 顯式強制開啟
+        function initializeSurveyApp() {
+            try {
+                // 避免初始化函式重複執行時，名單與對應資料重複加入
+                targetList.length = 0;
+                evaluatorMapping.length = 0;
+
+                parseRosterAndBuildDatabase();
+                document.getElementById('total-count').textContent = questions.length;
+                initTargetOptions();
+                toggleMode();
+                loadGasUrl(); // 載入儲存的 API 網址
+
+                // 檢查快取中開發者模式是否已被開啟過，以決定預設狀態
+                const devModePref = localStorage.getItem('chimei_survey_dev_mode');
+                if (devModePref === 'true') {
+                    toggleDevMode(true); // 顯式強制開啟
+                }
+
+                console.log(`名單載入完成，共 ${targetList.length} 人。`);
+            } catch (error) {
+                console.error('系統初始化失敗：', error);
+                const select = document.getElementById('targetName');
+                if (select) {
+                    select.innerHTML = '<option value="">-- 名單載入失敗，請重新整理頁面 --</option>';
+                }
             }
-        };
+        }
+
+        // DOM 建立完成後立即載入，不等待外部 CDN、字型或圖表資源
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeSurveyApp, { once: true });
+        } else {
+            initializeSurveyApp();
+        }
 
         // 儲存與載入 GAS Web App 網址至瀏覽器快取 (LocalStorage)
         function saveGasUrl() {
@@ -1078,10 +1099,9 @@ HC\t小組長\t盧怡利\t陳惠滿
         }
 
         function loadGasUrl() {
+            const defaultGasUrl = 'https://script.google.com/macros/s/AKfycbz7_7OYHnSyKDLatY2WbyffTtnwVEn0_sOeFjmqsKEuqDucUlc1mztymFNgnq_xg6fS/exec';
             const saved = localStorage.getItem('chimei_survey_gas_url');
-            if (saved) {
-                document.getElementById('gasUrl').value = saved;
-            }
+            document.getElementById('gasUrl').value = saved || defaultGasUrl;
         }
 
         // 智慧型後端 API 測試連線與自動診斷功能 (防避 CORS 誤報)
@@ -1487,7 +1507,7 @@ HC\t小組長\t盧怡利\t陳惠滿
             const domainScores = calculateDomainScores();
             compileSpreadsheetPayload(domainScores);
             
-            const gasUrl = document.getElementById('gasUrl').value.trim() || 'https://script.google.com/macros/s/AKfycbwvyhNn-F3T_2Sy1gUCkU1MzV7McblSaJYQwbRVo78pARgaSVootfONkcLaUEiTKp3A/exec';
+            const gasUrl = document.getElementById('gasUrl').value.trim() || 'https://script.google.com/macros/s/AKfycbz7_7OYHnSyKDLatY2WbyffTtnwVEn0_sOeFjmqsKEuqDucUlc1mztymFNgnq_xg6fS/exec';
             const payloadData = JSON.parse(document.getElementById('json-payload').textContent);
 
             if (gasUrl) {
