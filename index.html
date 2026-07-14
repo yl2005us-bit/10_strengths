@@ -56,7 +56,7 @@
                 padding: 0 !important;
                 margin: 0 !important;
             }
-            .bg-white, .dark\:bg-slate-800 {
+            .bg-white, .dark:bg-slate-800 {
                 background: #ffffff !important;
                 color: #000000 !important;
                 border: none !important;
@@ -111,7 +111,7 @@
                     <i class="fa-solid fa-gear text-lg"></i>
                 </button>
                 <span class="hidden md:inline-block px-3 py-1 bg-chimei-50 text-chimei-600 dark:bg-chimei-900/30 dark:text-chimei-300 text-xs font-semibold rounded-full border border-chimei-200 dark:border-chimei-800">
-                    <i class="fa-solid fa-table-cells mr-1"></i>標準版對應
+                    <i class="fa-solid fa-table-cells mr-1"></i>十力精準對應版
                 </span>
             </div>
         </div>
@@ -172,10 +172,7 @@
         <!-- CONTAINER FOR FORM CARDS -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/50 p-6 md:p-10 transition-colors duration-200">
 
-            <!-- 
-                 [測試代碼]：後端 Google Apps Script 部署網址卡片
-                 套用 class="dev-element hidden"，預設不對使用者開放。點選 header 的「齒輪」即可顯示 
-            -->
+            <!-- ⚙️ 系統開發者設定卡片 -->
             <div id="dev-api-config" class="dev-element hidden mb-6 p-4 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
                 <label for="gasUrl" class="block text-xs font-bold text-chimei-600 dark:text-chimei-400 mb-1.5 flex items-center">
                     <i class="fa-solid fa-cloud-arrow-up mr-1.5 text-sm animate-pulse"></i> Google Apps Script 部署網址 (Web App URL) [測試與管理專用]
@@ -233,7 +230,7 @@
 
                     <!-- 評核年度 -->
                     <div>
-                        <label for="evalYear" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                             <i class="fa-solid fa-calendar-days text-chimei-500 mr-1"></i> 評核年度
                         </label>
                         <select class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 transition shadow-sm" id="evalYear">
@@ -246,7 +243,7 @@
 
                     <!-- 單位與名單搜尋 -->
                     <div>
-                        <label for="searchUnit" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                             <i class="fa-solid fa-magnifying-glass text-chimei-500 mr-1"></i> 快速篩選 (被評核者單位、職稱或姓名)
                         </label>
                         <div class="relative">
@@ -259,7 +256,7 @@
 
                     <!-- 被評核者選擇 -->
                     <div>
-                        <label for="targetName" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                             <i class="fa-solid fa-user-tag text-chimei-500 mr-1"></i> 被評核者姓名 <span class="text-rose-500">*</span>
                         </label>
                         <select class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-chimei-500 focus:border-chimei-500 transition shadow-sm" id="targetName" onchange="updateTargetInfo()">
@@ -270,13 +267,13 @@
                     <!-- 被評核者單位 & 職稱 -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="targetUnit" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                 <i class="fa-solid fa-hospital text-chimei-500 mr-1"></i> 被評核者單位
                             </label>
                             <input type="text" class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-slate-600 dark:text-slate-400 font-medium" id="targetUnit" readonly placeholder="系統帶出">
                         </div>
                         <div>
-                            <label for="targetTitle" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                 <i class="fa-solid fa-award text-chimei-500 mr-1"></i> 被評核者職稱
                             </label>
                             <input type="text" class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-slate-600 dark:text-slate-400 font-medium" id="targetTitle" readonly placeholder="系統帶出">
@@ -318,10 +315,6 @@
 
                 <!-- 流程按鈕 -->
                 <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-end items-center gap-3">
-                    <!-- 
-                         [測試代碼]：一鍵填寫測試
-                         套用 class="dev-element hidden"，預設隱藏。點選「齒輪」即可切換顯示。 
-                    -->
                     <button type="button" onclick="quickFillDemoAndNavigate()" class="dev-element hidden w-full md:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition flex items-center justify-center">
                         <i class="fa-solid fa-wand-magic-sparkles mr-2 text-chimei-500"></i> 一鍵速填(測試用)
                     </button>
@@ -342,10 +335,6 @@
                             </h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">請針對受評者表現，依序給予 1 ~ 5 分。填寫 1~3 分者須提供簡要理由。</p>
                         </div>
-                        <!-- 
-                             [測試代碼]：隨機填答模擬按鈕
-                             套用 class="dev-element hidden"，預設不對使用者開放。點選「齒輪」顯示。 
-                        -->
                         <button onclick="autoFillSurvey()" class="dev-element hidden self-start md:self-auto text-xs px-3 py-1.5 border border-chimei-300 text-chimei-600 dark:text-chimei-300 dark:border-chimei-700 rounded-lg hover:bg-chimei-50 dark:hover:bg-chimei-950/20 transition flex items-center">
                             <i class="fa-solid fa-bolt mr-1"></i> 自動隨機填答 (Demo)
                         </button>
@@ -460,10 +449,7 @@
                     </div>
                 </div>
 
-                <!-- 
-                     [測試代碼]：試算表對應扁平欄位 JSON 預覽
-                     套用 class="dev-element hidden"，預設不對使用者開放。點選「齒輪」顯示。 
-                -->
+                <!-- ⚙️ 試算表對應扁平欄位 JSON 預覽 -->
                 <div id="dev-json-payload" class="dev-element hidden mt-8 p-5 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700">
                     <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center mb-3">
                         <i class="fa-solid fa-database text-emerald-500 mr-2 text-lg"></i>
@@ -551,323 +537,347 @@
 
     <!-- 主 JavaScript 控制模組 -->
     <script>
-
-        // 護理十力核心題庫 (共 22 題)
+        // 護理十力核心題庫 (共 37 題)
         const questions = [
-            { id: 1, cat: "專業力", sub: "知識", text: "具備豐富的專科護理照護與臨床指導能力。" },
-            { id: 2, cat: "專業力", sub: "技能", text: "具備協助制(修)訂單位工作規範、照護常規或標準作業流程(SOP)的能力。" },
-            { id: 3, cat: "專業力", sub: "技能", text: "具備主動發掘、系統化分析，並妥善解決臨床工作流程問題的能力。" },
-            { id: 4, cat: "專業力", sub: "學術", text: "具備指導同仁撰寫實證護理(PICO)、個案報告、案例分析或專案書寫的能力。" },
-            { id: 5, cat: "彈性力", sub: "抗壓", text: "面對繁重工作負荷、高壓情境或突發危機時，能展現正向的調適力。" },
-            { id: 6, cat: "彈性力", sub: "適應", text: "面對政策改變或臨時人力調度等環境異動時，能迅速展現高度適應力。" },
-            { id: 7, cat: "溝通力", sub: "管道", text: "能清晰、精準地將院方與護理部政策傳達給同仁，落實暢通的雙向溝通。" },
-            { id: 8, cat: "溝通力", sub: "衝突", text: "能真誠聆聽同仁心聲，同理其感受，並具有妥善協調跨團隊衝突的能力。" },
-            { id: 9, cat: "領導力", sub: "凝聚", text: "能建立高向心力團隊，激發同仁的工作動機，共同達成單位的品質指標。" },
-            { id: 10, cat: "領導力", sub: "典範", text: "能展現專業護理主管風範、嚴守職業倫理，成為同仁的良好模範。" },
-            { id: 11, cat: "決策力", sub: "分析", text: "能根據實證與客觀數據做出決策，確保決策公正性，且符合臨床最佳利益。" },
-            { id: 12, cat: "決策力", sub: "承擔", text: "於緊急情境能臨危不亂，當機立斷，並勇於為決策結果承擔相應責任。" },
-            { id: 13, cat: "培育力", sub: "發展", text: "能妥善規劃並推動單位同仁的在職教育、教學輔導與進階（N至N4）訓練。" },
-            { id: 14, cat: "培育力", sub: "提攜", text: "關懷新進人員適應情形，指派適合臨床教師指導，並協助其職涯成長。" },
-            { id: 15, cat: "創新力", sub: "思維", text: "具備創新思維，積極鼓勵同仁進行臨床實務改進、研發輔具或創新作法。" },
-            { id: 16, cat: "創新力", sub: "資訊", text: "能鼓勵並引導同仁善用數位化工具與資訊科技，以精簡繁瑣工作流程。" },
-            { id: 17, cat: "關懷力", sub: "關愛", text: "真誠關懷同仁身心平衡與工作負荷，積極營造健康友善、溫馨的職場氛圍。" },
-            { id: 18, cat: "關懷力", sub: "同理", text: "能敏銳體察病患及家屬的需求與期望，帶領團隊落實全人感同身受之關懷。" },
-            { id: 19, cat: "執行力", sub: "效率", text: "對上級或護理部指派的專案工作，能妥善規劃，並高效率地在預期時間內完成。" },
-            { id: 20, cat: "執行力", sub: "品管", text: "落實定期工作稽核，隨時監測照護品質指標，運用PDCA工具進行持續改善。" },
-            { id: 21, cat: "協同力", sub: "合作", text: "主動與跨領域團隊（醫師、醫事人員、行政單位）合作，暢通科別溝通流程。" },
-            { id: 22, cat: "協同力", sub: "認同", text: "高度認同醫院的經營願景與核心價值，帶領單位同仁配合整體醫院發展策略。" }
+            // 專業力
+            { id: 1, cat: "專業力", sub: "知識", text: "她(他)具備專科性護理照護的能力" },
+            { id: 2, cat: "專業力", sub: "技能", text: "她(他)具備協助制(修)訂單位工作規範或流程的能力" },
+            { id: 3, cat: "專業力", sub: "技能", text: "她(他)具備問題解決的能力" },
+            { id: 4, cat: "專業力", sub: "學術", text: "她(他)具備協助輔導PICO作業、個案報告及直接輔導讀書報告、案例分析和專案書寫的能力" },
+            // 彈性力
+            { id: 5, cat: "彈性力", sub: "抗壓", text: "她(他)具備正向面對問題的能力" },
+            { id: 6, cat: "彈性力", sub: "復原", text: "她(他)具備從挫折中恢復的能力" },
+            { id: 7, cat: "彈性力", sub: "調適", text: "她(他)具備在壓力中調整自我的能力" },
+            // 團隊力
+            { id: 8, cat: "團隊力", sub: "合作力", text: "她(他)具備與別人分工合作的能力" },
+            { id: 9, cat: "團隊力", sub: "激勵", text: "她(他)具備激勵同仁的能力" },
+            { id: 10, cat: "團隊力", sub: "育才", text: "她(他)具備帶領學員達成學習目標的能力" },
+            // 辯證力
+            { id: 11, cat: "辯證力", sub: "邏輯", text: "她(他)具備邏輯思考的能力" },
+            { id: 12, cat: "辯證力", sub: "求知", text: "她(他)具備積極主動學習的能力" },
+            { id: 13, cat: "辯證力", sub: "找答案", text: "她(他)具備主動尋求答案的能力" },
+            { id: 14, cat: "辯證力", sub: "有見解", text: "她(他)具備充分表達意見的能力" },
+            { id: 15, cat: "辯證力", sub: "思考", text: "她(他)具備批判性思考的能力" },
+            // 溝通力
+            { id: 16, cat: "溝通力", sub: "表達組織", text: "她(他)具備有效傳達訊息的能力" },
+            { id: 17, cat: "溝通力", sub: "說服", text: "她(他)具備說服的能力" },
+            { id: 18, cat: "溝通力", sub: "引動力", text: "她(他)具備影響別人以達成組織目標的能力" },
+            { id: 19, cat: "溝通力", sub: "衝突", text: "她(他)具備衝突協調的能力" },
+            // 執行力
+            { id: 20, cat: "執行力", sub: "以身作則", text: "她(他)具備以身作則的能力" },
+            { id: 21, cat: "執行力", sub: "坦誠", text: "她(他)具備誠實不欺並遵循工作倫理的能力" },
+            { id: 22, cat: "執行力", sub: "公開", text: "她(他)具備公平公正地處理事務的能力" },
+            { id: 23, cat: "執行力", sub: "落實政策", text: "她(他)具備執行與推動政策的能力" },
+            { id: 24, cat: "執行力", sub: "達到目標", text: "她(他)具備於期限內達到目標的能力" },
+            // 洞悉力
+            { id: 25, cat: "洞悉力", sub: "敏感力", text: "她(他)具備發現問題的能力" },
+            { id: 26, cat: "洞悉力", sub: "自覺力", text: "她(他)具備自我反省的能力" },
+            { id: 27, cat: "洞悉力", sub: "危機預防與處理", text: "她(他)具備預防及處理危機的能力" },
+            // 影響力
+            { id: 28, cat: "影響力", sub: "信念", text: "她(他)具備堅定的信念" },
+            { id: 29, cat: "影響力", sub: "建立典範", text: "她(他)能成為別人學習的典範" },
+            { id: 30, cat: "影響力", sub: "魅力", text: "她(他)具備領導的魅力" },
+            // 創新力
+            { id: 31, cat: "創新力", sub: "變革", text: "她(他)樂於接受改變" },
+            { id: 32, cat: "創新力", sub: "另類", text: "她(他)能提出創新的想法" },
+            // 真誠力
+            { id: 33, cat: "真誠力", sub: "寬宏(包容)", text: "她(他)能接納別人不同的意見" },
+            { id: 34, cat: "真誠力", sub: "同理", text: "她(他)能站在別人的立場去設想" },
+            { id: 35, cat: "真誠力", sub: "關懷", text: "她(他)能主動關懷別人" },
+            { id: 36, cat: "真誠力", sub: "信任", text: "她(他)能言行一致，使人信任" },
+            { id: 37, cat: "真誠力", sub: "正直", text: "她(他)能真誠地對待別人" }
         ];
 
-        // 護理主管組織資料庫 (全院共 240+ 筆資料)
-        const RAW_ROSTER = `ER	護理長	澎安琪	許芳華				
-OPD	護理長	郭富美	李美慧				
-OR	護理長	黃代泱	李怡珍				
-CSR	護理長	陳韋如	李怡珍				
-3BI-Ⅰ	護理長	郭惠婷	柯雅婷				
-3BI-Ⅱ	護理長	許家蓁	柯雅婷				
-3CI	護理長	楊濘綺	柯雅婷				
-4A	護理長	王靜慧	徐富美				
-BR	護理長	呂佳蓁	徐富美				
-4AI	護理長	陶菁	徐富美				
-4BI	護理長	張明娟	柯雅婷				
-HR	護理長	黃惠暄	李美慧				
-Burn	護理長	杜雅惠	柯雅婷				
-5A	護理長	謝靜文	王維那				
-5B	護理長	鄭君婷	徐富美				
-5CI	護理長	許瑜玲	柯雅婷				
-TC	護理長	施皇任	林琪馨				
-6A	護理長	楊宜靜	王維那				
-6B	護理長	周敏怡	王維那				
-6BI	護理長	章正俐	柯雅婷				
-7A	護理長	李玉媚	王維那				
-7B	護理長	陳俞君	王維那				
-8A	護理長	李芷宜	許芳華				
-8B	護理長	張靜倫	許芳華				
-8C	護理長	陳岳君	林琪馨				
-9A	護理長	楊禮謙	許芳華				
-9B	護理長	魏嘉慧	王維那				
-10A	護理長	廖麗怡	王維那				
-10B	護理長	葉筱鳳	許芳華				
-RCC	護理長	蘇敬惠	柯雅婷				
-12A	護理長	陳淑娟	許芳華				
-12B	護理長	周珊珊	許芳華				
-HC	護理長	陳惠滿	林琪馨				
-PSY	護理長	陳欣懇	李美慧				
-台積電	護理長	林淑惠	李美慧				
-ER	副護理長	林筱茵	許芳華	澎安琪			
-ER	副護理長	吳柏勳	許芳華	澎安琪			
-ER	副護理長	邱怡菁	許芳華	澎安琪			
-OPD	副護理長	吳佩珊	李美慧	郭富美			
-OPD	副護理長	李清香	李美慧	郭富美			
-OR	副護理長	柯靜津	李怡珍	黃代泱			
-OR	副護理長	莊阿月	李怡珍	黃代泱			
-OR	副護理長	王桂櫻	李怡珍	黃代泱			
-OR	副護理長	李嘉臻	李怡珍	黃代泱			
-CSR	副護理長	林青霞	李怡珍	陳韋如			
-CSR	副護理長	蔡幸紋	李怡珍	陳韋如			
-3BI-Ⅰ	副護理長	陳鄉尹	柯雅婷	郭惠婷			
-3BI-Ⅱ	副護理長	劉佳禎	柯雅婷	許家蓁			
-3BI-Ⅱ	副護理長	謝佳妏	柯雅婷	許家蓁			
-3CI	副護理長	陳柏翰	柯雅婷	楊濘綺			
-DR	副護理長	盧怡萍	徐富美	王靜慧			
-4AI	副護理長	蔡宛菁	徐富美	陶菁			
-HR	副護理長	葉美鈴	李美慧	黃惠暄			
-HR	副護理長	陳?湄	李美慧	黃惠暄			
-4BI	副護理長	鄭淑華	柯雅婷	張明娟			
-4BI	副護理長	邱美娟	柯雅婷	張明娟			
-5A	副護理長	劉思汝	王維那	謝靜文			
-5A	副護理長	林莞潔	王維那	謝靜文			
-5CI	副護理長	洪玉玲	柯雅婷	許瑜玲			
-6A	副護理長	張雅婷	王維那	楊宜靜			
-6A	副護理長	黃喬伶	王維那	楊宜靜			
-TC	副護理長	魏晶婷	林琪馨	施皇任			
-6B	副護理長	林虹汶	王維那	周敏怡			
-6BI	副護理長	林岢臻	柯雅婷	章正俐			
-6BI	副護理長	謝坤男	柯雅婷	章正俐			
-7A	副護理長	張嘉奇	王維那	李玉媚			
-7B	副護理長	李麗華	王維那	陳俞君			
-8A	副護理長	林翔宇	許芳華	李芷宜			
-8C	副護理長	魏妙芬	林琪馨	陳岳君			
-8C	副護理長	黃貞瑗	林琪馨	陳岳君			
-9A	副護理長	王秀玲	許芳華	楊禮謙			
-9A	副護理長	楊婷雅	許芳華	楊禮謙			
-9B	副護理長	林雅萍	王維那	魏嘉慧			
-10B	副護理長	陳佳婉	許芳華	葉筱鳳			
-12A	副護理長	謝淑娟	許芳華	陳淑娟			
-RCC	副護理長	舒伊敏	柯雅婷	蘇敬惠			
-ER	小組長	劉淑娟	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	張惠茹	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	朱宜鳳	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	白佳玉	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	許惠靜	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	楊雅君	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	沈怡穎	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	邱小鳳	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	顧素真	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	陳砡寶	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	李曉萍	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	董雅華	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	趙子慧	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	王怡靜	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	嚴逸屏	澎安琪	林筱茵	吳柏勳	邱怡菁	
-ER	小組長	謝昀霖	澎安琪	林筱茵	吳柏勳	邱怡菁	
-OPD	小組長	胡淑萍	郭富美	吳佩珊	李清香		
-OPD	小組長	劉心倩	郭富美	吳佩珊	李清香		
-OPD	小組長	林淑美	郭富美	吳佩珊	李清香		
-OPD	小組長	蔡素蕊	郭富美	吳佩珊	李清香		
-OPD	小組長	劉育甄	郭富美	吳佩珊	李清香		
-OR	小組長	王麗卿	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	利孟蓉	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	張秀鳳	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	李菊華	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	邱梅琳	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	郭小碧	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	楊思惠	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	李月晶	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	王雅芳	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	楊純佩	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	陳振福	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	怡君	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-OR	小組長	溫惠萍	黃代泱	柯靜津	莊阿月	王桂櫻	李嘉臻
-CSR	小組長	吳佳蓉	陳韋如	林青霞	蔡幸紋		
-3BI-Ⅰ	小組長	趙曉梅	郭惠婷	陳鄉尹			
-3BI-Ⅰ	小組長	宋易穎	郭惠婷	陳鄉尹			
-3BI-Ⅰ	小組長	張俐娟	郭惠婷	陳鄉尹			
-3BI-Ⅰ	小組長	林蓬如	郭惠婷	陳鄉尹			
-3BI-Ⅰ	小組長	王郁婷	郭惠婷	陳鄉尹			
-3BI-Ⅱ	小組長	柯欣慧	許家蓁	劉佳禎	謝佳妏		
-3BI-Ⅱ	小組長	林毓涵	許家蓁	劉佳禎	謝佳妏		
-3BI-Ⅱ	洪瑋翎	許家蓁	劉佳禎	謝佳妏		
-3BI-Ⅱ	小組長	曾莉淳	許家蓁	劉佳禎	謝佳妏		
-3BI-Ⅱ	小組長	何雅惠	許家蓁	劉佳禎	謝佳妏		
-3CI	小組長	謝玫君	楊濘綺	陳柏翰			
-3CI	小組長	賴韻如	楊濘綺	陳柏翰			
-3CI	小組長	張怡蓁	楊濘綺	陳柏翰			
-4A	小組長	吳翊禎	王靜慧				
-4A	小組長	王儷蓉	王靜慧				
-4A	小組長	農蕙芬	王靜慧				
-DR	小組長	宋玫伶	王靜慧	盧怡萍			
-DR	小組長	邱惠如	王靜慧	盧怡萍			
-DR	小組長	李瓊如	王靜慧	盧怡萍			
-DR	小組長	韓柏庭	王靜慧	盧怡萍			
-BR	小組長	李慈蓉	呂佳蓁				
-病嬰室	小組長	郭秀慧	呂佳蓁				
-病嬰室	小組長	陳乃瑗	呂佳蓁				
-病嬰室	小組長	陳雅君	呂佳蓁				
-病嬰室	小組長	林佳慧	呂佳蓁				
-病嬰室	小組長	陳鈴資	呂佳蓁				
-4AI	小組長	李惠綾	陶菁	蔡宛菁			
-4AI	小組長	劉俐均	陶菁	蔡宛菁			
-4AI	小組長	李岱芳	陶菁	蔡宛菁			
-4AI	小組長	廖梅菁	陶菁	蔡宛菁			
-4AI	小組長	丁祖珍	陶菁	蔡宛菁			
-4AI	小組長	陳怡	陶菁	蔡宛菁			
-4AI	小組長	呂和容	陶菁	蔡宛菁			
-4BI	小組長	張伊雯	張明娟	鄭淑華	邱美娟		
-4BI	小組長	邱筱鈞	張明娟	鄭淑華	邱美娟		
-4BI	小組長	陳若曦	張明娟	鄭淑華	邱美娟		
-4BI	小組長	蕭百雯	張明娟	鄭淑華	邱美娟		
-4BI	小組長	陳豌華	張明娟	鄭淑華	邱美娟		
-4BI	小組長	邱昱瑄	張明娟	鄭淑華	邱美娟		
-4BI	小組長	蘇郁婷	張明娟	鄭淑華	邱美娟		
-4BI	小組長	張芝姍	張明娟	鄭淑華	邱美娟		
-4BI	小組長	王政凱	張明娟	鄭淑華	邱美娟		
-Burn	小組長	林秀苓	杜雅惠				
-Burn	小組長	林宜葳	杜雅惠				
-Burn	小組長	林姿妤	杜雅惠				
-Burn	小組長	楊青樺	杜雅惠				
-Burn	小組長	郭芳伶	杜雅惠				
-HR	小組長	林莊秋萍	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	賴秀芬	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	戴雅芳	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	鄭秋婷	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	邱雅蘭	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	郭雅雯	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	吳佩樺	黃惠暄	葉美鈴	陳?湄		
-HR	小組長	莊佩勳	黃惠暄	葉美鈴	陳?湄		
-PD	小組長	盧淑貞	黃惠暄				
-5A	小組長	蔡瑋芬	謝靜文	劉思汝	林莞潔		
-5A	小組長	蘇偉安	謝靜文	劉思汝	林莞潔		
-5A	小組長	黃翠吟	謝靜文	劉思汝	林莞潔		
-5A	小組長	許娟	謝靜文	劉思汝	林莞潔		
-5A	小組長	許雯婷	謝靜文	劉思汝	林莞潔		
-5A	小組長	謝蕙青	謝靜文	劉思汝	林莞潔		
-5A	小組長	黃棱	謝靜文	劉思汝	林莞潔		
-5A	小組長	陳亭伊	謝靜文	劉思汝	林莞潔		
-5B	小組長	侯芬芳	鄭君婷				
-5B	小組長	廖秋惠	鄭君婷				
-5B	小組長	吳頌誼	鄭君婷				
-5B	小組長	張淑儀	鄭君婷				
-5CI	小組長	陳梅斐	許瑜玲	洪玉玲			
-5CI	小組長	翁慧君	許瑜玲	洪玉玲			
-5CI	小組長	陳靜宜	許瑜玲	洪玉玲			
-5CI	小組長	蔡佩云	許瑜玲	洪玉玲			
-5CI	小組長	林佩君	許瑜玲	洪玉玲			
-5CI	小組長	張富雅	許瑜玲	洪玉玲			
-6A	小組長	黃琬婷	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	陳怡君	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	黃郁雯	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	蘇致穎	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	謝佳君	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	郭淑萍	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	詹璧甄	楊宜靜	張雅婷	黃喬伶		
-6A	小組長	吳佳玲	楊宜靜	張雅婷	黃喬伶		
-TC	小組長	蕭茜文	施皇任	魏晶婷			
-6B	小組長	陳怡秀	周敏怡	林虹汶			
-6B	小組長	莊素雲	周敏怡	林虹汶			
-6B	小組長	黃亭尹	周敏怡	林虹汶			
-6B	小組長	陳韋安	周敏怡	林虹汶			
-6B	小組長	謝淑玲	周敏怡	林虹汶			
-6BI	小組長	連淑宜	章正俐	林岢臻	謝坤男		
-6BI	小組長	戴碧卿	章正俐	林岢臻	謝坤男		
-6BI	小組長	黃馨宜	章正俐	林岢臻	謝坤男		
-6BI	小組長	陳怡婷	章正俐	林岢臻	謝坤男		
-6BI	小組長	陳雲萍	章正俐	林岢臻	謝坤男		
-6BI	小組長	郭廷鍇	章正俐	林岢臻	謝坤男		
-6BI	小組長	吳宛如	章正俐	林岢臻	謝坤男		
-6BI	小組長	陳巧雲	章正俐	林岢臻	謝坤男		
-6BI	小組長	李柏志	章正俐	林岢臻	謝坤男		
-7A	小組長	周怡禎	李玉媚	張嘉奇			
-7A	小組長	程維平	李玉媚	張嘉奇			
-7A	小組長	自動篩選	李玉媚	張嘉奇			
-7A	小組長	王珈雯	李玉媚	張嘉奇			
-7A	小組長	林盈萱	李玉媚	張嘉奇			
-7A	小組長	洪翊庭	李玉媚	張嘉奇			
-7A	小組長	沈錦菱	李玉媚	張嘉奇			
-7A	小組長	簡珮靖	李玉媚	張嘉奇			
-7B	小組長	溫秋萍	陳俞君	李麗華			
-7B	小組長	王羿茹	陳俞君	李麗華			
-7B	小組長	陳柍圻	陳俞君	李麗華			
-7B	小組長	蔡嘉慧	陳俞君	李麗華			
-7B	小組長	林永樺	陳俞君	李麗華			
-7B	小組長	莊佩華	陳俞君	李麗華			
-8A	小組長	楊筱宇	李芷宜	林翔宇			
-8A	小組長	許桂禎	李芷宜	林翔宇			
-8A	小組長	陳柔安	李芷宜	林翔宇			
-8A	小組長	戴怡珍	李芷宜	林翔宇			
-8A	小組長	曾雅玲	李芷宜	林翔宇			
-8A	小組長	葉家華	李芷宜	林翔宇			
-8A	小組長	林雨璇	李芷宜	林翔宇			
-8A	小組長	朱雅琳	李芷宜	林翔宇			
-8A	小組長	李淑瑛	李芷宜	林翔宇			
-8A	小組長	楊佳純	李芷宜	林翔宇			
-8B	小組長	廖庭毅	張靜倫				
-8B	小組長	歐千瑜	張靜倫				
-8B	小組長	么郁卉	張靜倫				
-8B	小組長	鄭君秀	張靜倫				
-8B	小組長	張文甄	張靜倫				
-8C	小組長	廖怡菁	陳岳君	黃貞瑗	魏妙芬		
-8C	小組長	張靉卿	陳岳君	黃貞瑗	魏妙芬		
-8C	小組長	王麗淑	陳岳君	黃貞瑗	魏妙芬		
-8C	小組長	杜文綺	陳岳君	黃貞瑗	魏妙芬		
-8C	小組長	林靖瑜	陳岳君	黃貞瑗	魏妙芬		
-8C	小組長	陳依靜	陳岳君	黃貞瑗	魏妙芬		
-9A	小組長	黃乃令	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	劉靜韻	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	林佳穎	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	呂湘凌	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	黃琬珺	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	楊秀佩	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	林吟璇	楊禮謙	王秀玲	楊婷雅		
-9A	小組長	曾千華	楊禮謙	王秀玲	楊婷雅		
-9B	小組長	黃惠琪	魏嘉慧	林雅萍			
-9B	小組長	翁立豪	魏嘉慧	林雅萍			
-9B	小組長	林郁娟	魏嘉慧	林雅萍			
-9B	小組長	鄭妃吟	魏嘉慧	林雅萍			
-9B	小組長	何沛璇	魏嘉慧	林雅萍			
-9B	小組長	鄭微蓁	魏嘉慧	林雅萍			
-10A	小組長	黃怡庭	廖麗怡				
-10A	小組長	陳怡伶	廖麗怡				
-10A	小組長	詹婉渝	廖麗怡				
-10A	小組長	陳湘琳	廖麗怡				
-10B	小組長	李佳珍	葉筱鳳	陳佳婉			
-10B	小組長	蔡芳怡	葉筱鳳	陳佳婉			
-10B	小組長	陳怡璁	葉筱鳳	陳佳婉			
-10B	小組長	何欣樺	葉筱鳳	陳佳婉			
-10B	小組長	翁鈺期	葉筱鳳	陳佳婉			
-10B	小組長	王羿云	葉筱鳳	陳佳婉			
-12A	小組長	高汝珍	陳淑娟	謝淑娟			
-12A	小組長	莊佩樺	陳淑娟	謝淑娟			
-12A	小組長	陳佳敏	陳淑娟	謝淑娟			
-12A	小組長	馮惠雅	陳淑娟	謝淑娟			
-12B	小組長	葉曉雯	周珊珊				
-12B	小組長	陳姿穎	周珊珊				
-12B	小組長	盧佩瑩	周珊珊				
-12B	小組長	王藝蓁	周珊珊				
-PSY	小組長	鄭殷甄	陳欣懇				
-PSY	小組長	林懿弘	陳欣懇				
-PSY	小組長	王苡禎	陳欣懇				
-PSY	小組長	黃雅琪	陳欣懇				
-PSY	小組長	蔡昱潔	陳欣懇				
-PSY	小組長	楊雅萍	陳欣懇				
-RCC	小組長	楊惠晶	蘇敬惠	舒伊敏			
-RCC	小組長	洪絜昕	蘇敬惠	舒伊敏			
-RCC	小組長	陳思棠	蘇敬惠	舒伊敏			
-RCC	洪暄惠	蘇敬惠	舒伊敏			
-RCC	小組長	楊凱婷	蘇敬惠	舒伊敏			
-HC	小組長	盧怡利	陳惠滿				
-日間照顧中心	小組長	呂佳惠					
-社區整合	小組長	蘇文義					`;
+        // 護理主管組織資料庫 (修正所有轉義字元衝突，確保 100% 編譯成功)
+        const RAW_ROSTER = `ER\t護理長\t澎安琪\t許芳華\t\t\t\t
+OPD\t護理長\t郭富美\t李美慧\t\t\t\t
+OR\t護理長\t黃代泱\t李怡珍\t\t\t\t
+CSR\t護理長\t陳韋如\t李怡珍\t\t\t\t
+3BI-Ⅰ\t護理長\t郭惠婷\t柯雅婷\t\t\t\t
+3BI-Ⅱ\t護理長\t許家蓁\t柯雅婷\t\t\t\t
+3CI\t護理長\t楊濘綺\t柯雅婷\t\t\t\t
+4A\t護理長\t王靜慧\t徐富美\t\t\t\t
+BR\t護理長\t呂佳蓁\t徐富美\t\t\t\t
+4AI\t護理長\t陶  菁\t徐富美\t\t\t\t
+4BI\t護理長\t張明娟\t柯雅婷\t\t\t\t
+HR\t護理長\t黃惠暄\t李美慧\t\t\t\t
+Burn\t護理長\t杜雅惠\t柯雅婷\t\t\t\t
+5A\t護理長\t謝靜文\t王維那\t\t\t\t
+5B\t護理長\t鄭君婷\t徐富美\t\t\t\t
+5CI\t護理長\t許瑜玲\t柯雅婷\t\t\t\t
+TC\t護理長\t施皇任\t林琪馨\t\t\t\t
+6A\t護理長\t楊宜靜\t王維那\t\t\t\t
+6B\t護理長\t周敏怡\t王維那\t\t\t\t
+6BI\t護理長\t章正俐\t柯雅婷\t\t\t\t
+7A\t護理長\t李玉媚\t王維那\t\t\t\t
+7B\t護理長\t陳俞君\t王維那\t\t\t\t
+8A\t護理長\t李芷宜\t許芳華\t\t\t\t
+8B\t護理長\t張靜倫\t許芳華\t\t\t\t
+8C\t護理長\t陳岳君\t林琪馨\t\t\t\t
+9A\t護理長\t楊禮謙\t許芳華\t\t\t\t
+9B\t護理長\t魏嘉慧\t王維那\t\t\t\t
+10A\t護理長\t廖麗怡\t王維那\t\t\t\t
+10B\t護理長\t葉筱鳳\t許芳華\t\t\t\t
+RCC\t護理長\t蘇敬惠\t柯雅婷\t\t\t\t
+12A\t護理長\t陳淑娟\t許芳華\t\t\t\t
+12B\t護理長\t周珊珊\t許芳華\t\t\t\t
+HC\t護理長\t陳惠滿\t林琪馨\t\t\t\t
+PSY\t護理長\t陳欣懇\t李美慧\t\t\t\t
+台積電\t護理長\t林淑惠\t李美慧\t\t\t\t
+ER\t副護理長\t林筱茵\t許芳華\t澎安琪			
+ER\t副護理長\t吳柏勳\t許芳華\t澎安琪			
+ER\t副護理長\t邱怡菁\t許芳華\t澎安琪			
+OPD\t副護理長\t吳佩珊\t李美慧\t郭富美			
+OPD\t副護理長\t李清香\t李美慧\t郭富美			
+OR\t副護理長\t柯靜津\t李怡珍\t黃代泱			
+OR\t副護理長\t莊阿月\t李怡珍\t黃代泱			
+OR\t副護理長\t王桂櫻\t李怡珍\t黃代泱			
+OR\t副護理長\t李嘉臻\t李怡珍\t黃代泱			
+CSR\t副護理長\t林青霞\t李怡珍\t陳韋如			
+CSR\t副護理長\t蔡幸紋\t李怡珍\t陳韋如			
+3BI-Ⅰ\t副護理長\t陳鄉尹\t柯雅婷\t郭惠婷			
+3BI-Ⅱ\t副護理長\t劉佳禎\t柯雅婷\t許家蓁			
+3BI-Ⅱ\t副護理長\t謝佳妏\t柯雅婷\t許家蓁			
+3CI\t副護理長\t陳柏翰\t柯雅婷\t楊濘綺			
+DR\t副護理長\t盧怡萍\t徐富美\t王靜慧			
+4AI\t副護理長\t蔡宛菁\t徐富美\t陶  菁			
+HR\t副護理長\t葉美鈴\t李美慧\t黃惠暄			
+HR\t副護理長\t陳椀湄\t李美慧\t黃惠暄			
+4BI\t副護理長\t鄭淑華\t柯雅婷\t張明娟			
+4BI\t副護理長\t邱美娟\t柯雅婷\t張明娟			
+5A\t副護理長\t劉思汝\t王維那\t謝靜文			
+5A\t副護理長\t林莞潔\t王維那\t謝靜文			
+5CI\t副護理長\t洪玉玲\t柯雅婷\t許瑜玲			
+6A\t副護理長\t張柯雅婷\t王維那\t楊宜靜			
+6A\t副護理長\t黃喬伶\t王維那\t楊宜靜			
+TC\t副護理長\t魏晶婷\t林琪馨\t施皇任			
+6B\t副護理長\t林虹汶\t王維那\t周敏怡			
+6BI\t副護理長\t林岢臻\t柯雅婷\t章正俐			
+6BI\t副護理長\t謝坤男\t柯雅婷\t章正俐			
+7A\t副護理長\t張嘉奇\t王維那\t李玉媚			
+7B\t副護理長\t李麗華\t王維那\t陳俞君			
+8A\t副護理長\t林翔宇\t許芳華\t李芷宜			
+8C\t副護理長\t魏妙芬\t林琪馨\t陳岳君			
+8C\t副護理長\t黃貞瑗\t林琪馨\t陳岳君			
+9A\t副護理長\t王秀玲\t許芳華\t楊禮謙			
+9A\t副護理長\t楊婷雅\t許芳華\t楊禮謙			
+9B\t副護理長\t林雅萍\t王維那\t魏嘉慧			
+10B\t副護理長\t陳佳婉\t許芳華\t葉筱鳳			
+12A\t副護理長\t謝淑娟\t許芳華\t陳淑娟			
+RCC\t副護理長\t舒伊敏\t柯雅婷\t蘇敬惠			
+ER\t小組長\t劉淑娟\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t張惠茹\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t朱宜鳳\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t白佳玉\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t決惠靜\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t楊雅君\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t沈怡穎\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t邱小鳳\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t顧素真\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t陳砡寶\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t李曉萍\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t董雅華\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t趙子慧\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t王怡靜\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t嚴逸屏\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+ER\t小組長\t謝昀霖\t澎安琪\t林筱茵\t吳柏勳\t邱怡菁	
+OPD\t小組長\t胡淑萍\t郭富美\t吳佩珊\t李清香		
+OPD\t小組長\t劉心倩\t郭富美\t吳佩珊\t李清香		
+OPD\t小組長\t林淑美\t郭富美\t吳佩珊\t李清香		
+OPD\t小組長\t蔡素蕊\t郭富美\t吳佩珊\t李清香		
+OPD\t小組長\t劉育甄\t郭富美\t吳佩珊\t李清香		
+OR\t小組長\t王麗卿\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t利孟蓉\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t張秀鳳\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t李菊華\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t邱梅琳\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t郭小碧\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t楊思惠\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t李月晶\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t王雅芳\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t楊純佩\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t陳振福\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t怡君\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+OR\t小組長\t溫惠萍\t黃代泱\t柯靜津\t莊阿月\t王桂櫻\t李嘉臻
+CSR\t小組長\t吳佳蓉\t陳韋如\t林青霞\t蔡幸紋		
+3BI-Ⅰ\t小組長\t趙曉梅\t郭惠婷\t陳鄉尹			
+3BI-Ⅰ\t小組長\t宋易穎\t郭惠婷\t陳鄉尹			
+3BI-Ⅰ\t小組長\t張俐娟\t郭惠婷\t陳鄉尹			
+3BI-Ⅰ\t小組長\t林蓬如\t郭惠婷\t陳鄉尹			
+3BI-Ⅰ\t小組長\t王郁婷\t郭惠婷\t陳鄉尹			
+3BI-Ⅱ\t小組長\t柯欣慧\t許家蓁\t劉佳禎\t謝佳妏		
+3BI-Ⅱ\t小組長\t林毓涵\t許家蓁\t劉佳禎\t謝佳妏		
+3BI-Ⅱ\t小組長\t洪瑋翎\t許家蓁\t劉佳禎\t謝佳妏		
+3BI-Ⅱ\t小組長\t曾莉淳\t許家蓁\t劉佳禎\t謝佳妏		
+3BI-Ⅱ\t小組長\t何雅惠\t許家蓁\t劉佳禎\t謝佳妏		
+3CI\t小組長\t謝玫君\t楊濘綺\t陳柏翰			
+3CI\t小組長\t賴韻如\t楊濘綺\t陳柏翰			
+3CI\t小組長\t張怡蓁\t楊濘綺\t陳柏翰			
+4A\t小組長\t吳翊禎\t王靜慧				
+4A\t小組長\t王儷蓉\t王靜慧				
+4A\t小組長\t農蕙芬\t王靜慧				
+DR\t小組長\t宋玫伶\t王靜慧\t盧怡萍			
+DR\t小組長\t邱惠如\t王靜慧\t盧怡萍			
+DR\t小組長\t李瓊如\t王靜慧\t盧怡萍			
+DR\t小組長\t韓柏庭\t王靜慧\t盧怡萍			
+BR\t小組長\t李慈蓉\t呂佳蓁				
+病嬰室\t小組長\t郭秀慧\t呂佳蓁				
+病嬰室\t小組長\t陳乃瑗\t呂佳蓁				
+病嬰室\t小組長\t陳雅君\t呂佳蓁				
+病嬰室\t小組長\t林佳慧\t呂佳蓁				
+病嬰室\t小組長\t陳鈴資\t呂佳蓁				
+4AI\t小組長\t李惠綾\t陶  菁\t蔡宛菁			
+4AI\t小組長\t劉俐均\t陶  菁\t蔡宛菁			
+4AI\t小組長\t李岱芳\t陶  菁\t蔡宛菁			
+4AI\t小組長\t廖梅菁\t陶  菁\t蔡宛菁			
+4AI\t小組長\t丁祖珍\t陶  菁\t蔡宛菁			
+4AI\t小組長\t陳怡\t陶  菁\t蔡宛菁			
+4AI\t小組長\t呂和容\t陶  菁\t蔡宛菁			
+4BI\t小組長\t張伊雯\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t邱筱鈞\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t陳若曦\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t蕭百雯\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t陳豌華\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t邱昱瑄\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t蘇郁婷\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t張芝姍\t張明娟\t鄭淑華\t邱美娟		
+4BI\t小組長\t王政凱\t張明娟\t鄭淑華\t邱美娟		
+Burn\t小組長\t林秀苓\t杜雅惠				
+Burn\t小組長\t林宜葳\t杜雅惠				
+Burn\t小組長\t林姿妤\t杜雅惠				
+Burn\t小組長\t楊青樺\t杜雅惠				
+Burn\t小組長\t郭芳伶\t杜雅惠				
+HR\t小組長\t林莊秋萍\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t賴秀芬\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t戴雅芳\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t鄭秋婷\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t邱雅蘭\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t郭雅雯\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t吳佩樺\t黃惠暄\t葉美鈴\t陳椀湄		
+HR\t小組長\t莊佩勳\t黃惠暄\t葉美鈴\t陳椀湄		
+腹膜透析\t小組長\t盧淑貞\t黃惠暄				
+5A\t小組長\t蔡瑋芬\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t蘇偉安\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t黃翠吟\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t許娟\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t許雯婷\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t謝蕙青\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t黃棱瑜\t謝靜文\t劉思汝\t林莞潔		
+5A\t小組長\t陳亭伊\t謝靜文\t劉思汝\t林莞潔		
+5B\t小組長\t侯芬芳\t鄭君婷				
+5B\t小組長\t廖秋惠\t鄭君婷				
+5B\t小組長\t吳頌誼\t鄭君婷				
+5B\t小組長\t張淑儀\t鄭君婷				
+5CI\t小組長\t陳梅斐\t許瑜玲\t洪玉玲			
+5CI\t小組長\t翁慧君\t許瑜玲\t洪玉玲			
+5CI\t小組長\t陳靜宜\t許瑜玲\t洪玉玲			
+5CI\t小組長\t蔡佩云\t許瑜玲\t洪玉玲			
+5CI\t小組長\t林佩君\t許瑜玲\t洪玉玲			
+5CI\t小組長\t張富雅\t許瑜玲\t洪玉玲			
+6A\t小組長\t黃琬婷\t楊宜靜\t張柯雅婷\t黃喬伶		
+6A\t小組長\t陳怡君\t楊宜靜\t張雅婷\t黃喬伶		
+6A\t小組長\t黃郁雯\t楊宜靜\t張雅婷\t黃喬伶		
+6A\t小組長\t蘇致穎\t楊宜靜\t張雅婷\t黃喬伶		
+6A\t小組長\t謝佳君\t楊宜靜\t張雅婷\t黃喬伶		
+6A\t小組長\t郭淑萍\t楊宜靜\t張雅婷\t黃喬伶		
+6A\t小組長\t詹璧甄\t楊宜靜\t張雅婷\t黃喬伶		
+6A\t小組長\t吳佳玲\t楊宜靜\t張雅婷\t黃喬伶		
+TC\t小組長\t蕭茜文\t施皇任\t魏晶婷			
+6B\t小組長\t陳怡秀\t周敏怡\t林虹汶			
+6B\t小組長\t莊素雲\t周敏怡\t林虹汶			
+6B\t小組長\t黃亭尹\t周敏怡\t林虹汶			
+6B\t小組長\t陳韋安\t周敏怡\t林虹汶			
+6B\t小組長\t謝淑玲\t周敏怡\t林虹汶			
+6BI\t小組長\t連淑宜\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t戴碧卿\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t黃馨宜\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t陳怡婷\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t陳雲萍\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t郭廷鍇\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t吳宛如\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t陳巧雲\t章正俐\t林岢臻\t謝坤男		
+6BI\t小組長\t李柏志\t章正俐\t林岢臻\t謝坤男		
+7A\t小組長\t周怡禎\t李玉媚\t張嘉奇			
+7A\t小組長\t程維平\t李玉媚\t張嘉奇			
+7A\t小組長\t邱竹吟\t李玉媚\t張嘉奇			
+7A\t小組長\t王珈雯\t李玉媚\t張嘉奇			
+7A\t小組長\t林盈萱\t李玉媚\t張嘉奇			
+7A\t小組長\t洪翊庭\t李玉媚\t張嘉奇			
+7A\t小組長\t沈錦菱\t李玉媚\t張嘉奇			
+7A\t小組長\t簡珮靖\t李玉媚\t張嘉奇			
+7B\t小組長\t溫秋萍\t陳俞君\t李麗華			
+7B\t小組長\t王羿茹\t陳俞君\t李麗華			
+7B\t小組長\t陳柍圻\t陳俞君\t李麗華			
+7B\t小組長\t蔡嘉慧\t陳俞君\t李麗華			
+7B\t小組長\t林永樺\t陳俞君\t李麗華			
+7B\t小組長\t莊佩華\t陳俞君\t李麗華			
+8A\t小組長\t楊筱宇\t李芷宜\t林翔宇			
+8A\t小組長\t許桂禎\t李芷宜\t林翔宇			
+8A\t小組長\t陳柔安\t李芷宜\t林翔宇			
+8A\t小組長\t戴怡珍\t李芷宜\t林翔宇			
+8A\t小組長\t曾雅玲\t李芷宜\t林翔宇			
+8A\t小組長\t葉家華\t李芷宜\t林翔宇			
+8A\t小組長\t林雨璇\t李芷宜\t林翔宇			
+8A\t小組長\t朱雅琳\t李芷宜\t林翔宇			
+8A\t小組長\t李淑瑛\t李芷宜\t林翔宇			
+8A\t小組長\t楊佳純\t李芷宜\t林翔宇			
+8B\t小組長\t廖庭毅\t張靜倫				
+8B\t小組長\t歐千瑜\t張靜倫				
+8B\t小組長\t么郁卉\t張靜倫				
+8B\t小組長\t鄭君秀\t張靜倫				
+8B\t小組長\t張文甄\t張靜倫				
+8C\t小組長\t廖怡菁\t陳岳君\t黃貞瑗\t魏妙芬		
+8C\t小組長\t張靉卿\t陳岳君\t黃貞瑗\t魏妙芬		
+8C\t小組長\t王麗淑\t陳岳君\t黃貞瑗\t魏妙芬		
+8C\t小組長\t杜文綺\t陳岳君\t黃貞瑗\t魏妙芬		
+8C\t小組長\t林靖瑜\t陳岳君\t黃貞瑗\t魏妙芬		
+8C\t小組長\t陳依靜\t陳岳君\t黃貞瑗\t魏妙芬		
+9A\t小組長\t黃乃令\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t劉靜韻\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t林佳穎\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t呂湘凌\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t黃琬珺\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t楊秀佩\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t林吟璇\t楊禮謙\t王秀玲\t楊婷雅		
+9A\t小組長\t曾千華\t楊禮謙\t王秀玲\t楊婷雅		
+9B\t小組長\t黃惠琪\t魏嘉慧\t林雅萍			
+9B\t小組長\t翁立豪\t魏嘉慧\t林雅萍			
+9B\t小組長\t林郁娟\t魏嘉慧\t林雅萍			
+9B\t小組長\t鄭妃吟\t魏嘉慧\t林雅萍			
+9B\t小組長\t何沛璇\t魏嘉慧\t林雅萍			
+9B\t小組長\t鄭微蓁\t魏嘉慧\t林雅萍			
+10A\t小組長\t黃怡庭\t廖麗怡				
+10A\t小組長\t陳怡伶\t廖麗怡				
+10A\t小組長\t詹婉渝\t廖麗怡				
+10A\t小組長\t陳湘琳\t廖麗怡				
+10B\t小組長\t李佳珍\t葉筱鳳\t陳佳婉			
+10B\t小組長\t蔡芳怡\t葉筱鳳\t陳佳婉			
+10B\t小組長\t陳怡璁\t葉筱鳳\t陳佳婉			
+10B\t小組長\t何欣樺\t葉筱鳳\t陳佳婉			
+10B\t小組長\t翁鈺期\t葉筱鳳\t陳佳婉			
+10B\t小組長\t王羿云\t葉筱鳳\t陳佳婉			
+12A\t小組長\t高汝珍\t陳淑娟\t謝淑娟			
+12A\t小組長\t莊佩樺\t陳淑娟\t謝淑娟			
+12A\t小組長\t陳佳敏\t陳淑娟\t謝淑娟			
+12A\t小組長\t馮惠雅\t陳淑娟\t謝淑娟			
+12B\t小組長\t葉曉雯\t周珊珊				
+12B\t小組長\t陳姿穎\t周珊珊				
+12B\t小組長\t盧佩瑩\t周珊珊				
+12B\t小組長\t王藝蓁\t周珊珊				
+PSY\t小組長\t鄭殷甄\t陳欣懇				
+PSY\t小組長\t林懿弘\t陳欣懇				
+PSY\t小組長\t王苡禎\t陳欣懇				
+PSY\t小組長\t黃雅琪\t陳欣懇				
+PSY\t小組長\t蔡昱潔\t陳欣懇				
+PSY\t小組長\t楊雅萍\t陳欣懇				
+RCC\t小組長\t楊惠晶\t蘇敬惠\t舒伊敏			
+RCC\t小組長\t洪絜昕\t蘇敬惠\t舒伊敏			
+RCC\t小組長\t陳思棠\t蘇敬惠\t舒伊敏			
+RCC\t小組長\t洪暄惠\t蘇敬惠\t舒伊敏			
+RCC\t小組長\t楊凱婷\t蘇敬惠\t舒伊敏			
+HC\t小組長\t盧怡利\t陳惠滿				
+日間照顧中心\t小組長\t呂佳惠\t高金盆\t\t\t\t					
+社區整合型服務中心\t小組長\t蘇文義\t高金盆\t\t\t\t					`;
 
         // 本次填答數據暫存
         const targetList = [];
@@ -875,7 +885,6 @@ HC	小組長	盧怡利	陳惠滿
         let surveyAnswers = {};
         let surveyComments = {};
         let myRadarChart = null;
-
 
         // 自定義漂亮訊息框提示 (取代原生 alert)
         function showAlert(msg) {
@@ -936,7 +945,7 @@ HC	小組長	盧怡利	陳惠滿
             if (input.value === '930969') {
                 closePasswordModal();
                 toggleDevMode(true); // 顯式強制開啟
-                showAlert("🎉 驗證成功！管理人員系統偵錯面板已開啟。");
+                showAlert("🎉 驗證成功！管理人員系統設定面板已開啟。");
             } else {
                 showAlert("❌ 密碼錯誤！您無權限開啟管理人員系統設定。");
                 input.value = '';
@@ -960,7 +969,6 @@ HC	小組長	盧怡利	陳惠滿
                 localStorage.setItem('chimei_survey_dev_mode', isNowHidden ? 'false' : 'true');
             }
         }
-
 
         function parseRosterAndBuildDatabase() {
             const lines = RAW_ROSTER.trim().split('\n');
@@ -987,10 +995,12 @@ HC	小組長	盧怡利	陳惠滿
             });
 
             // 註冊直屬督導名單
-            const knownSupervisors = ["許芳華", "李美慧", "李怡珍", "柯雅婷", "徐富美", "王維那", "林琪馨"];
+            const knownSupervisors = ["許芳華", "李美慧", "李怡珍", "柯雅婷", "徐富美", "王維那", "林琪馨", "高金盆"];
             knownSupervisors.forEach(sup => {
                 if (!personLookup[sup]) {
-                    personLookup[sup] = { unit: "護理部", title: "督導" };
+                    // 高金盆職稱設定為「督導」，單位設定為「長照機構」，其餘為「護理部督導」
+                    const unitName = (sup === "高金盆") ? "長照機構" : "護理部";
+                    personLookup[sup] = { unit: unitName, title: "督導" };
                 }
             });
 
@@ -1073,7 +1083,6 @@ HC	小組長	盧怡利	陳惠滿
                 document.getElementById('gasUrl').value = saved;
             }
         }
-
 
         // 智慧型後端 API 測試連線與自動診斷功能 (防避 CORS 誤報)
         function testGasConnection() {
@@ -1236,7 +1245,6 @@ HC	小組長	盧怡利	陳惠滿
             }
         }
 
-
         function goToStep2() {
             const targetName = document.getElementById('targetName').value;
             if (!targetName) {
@@ -1272,7 +1280,6 @@ HC	小組長	盧怡利	陳惠滿
             document.getElementById('progress-line').style.width = "0%";
             window.scrollTo(0, 0);
         }
-
 
         function renderQuestions() {
             const container = document.getElementById('questionsList');
@@ -1451,7 +1458,6 @@ HC	小組長	盧怡利	陳惠滿
             goToStep2();
         }
 
-
         // 提交問卷並上傳雲端試算表 (支援與 CORS + redirect 優化後端寫入)
         function submitSurvey() {
             let unanswered = [];
@@ -1553,28 +1559,32 @@ HC	小組長	盧怡利	陳惠滿
             window.scrollTo(0, 0);
         }
 
+        // 動態計算各十力核心指標分數
         function calculateDomainScores() {
-            const domainConfig = {
-                "專業力": [1, 2, 3, 4],
-                "彈性力": [5, 6],
-                "溝通力": [7, 8],
-                "領導力": [9, 10],
-                "決策力": [11, 12],
-                "培育力": [13, 14],
-                "創新力": [15, 16],
-                "關懷力": [17, 18],
-                "執行力": [19, 20],
-                "協同力": [21, 22]
-            };
-
             let scores = {};
-            for (let name in domainConfig) {
-                const ids = domainConfig[name];
-                let sum = 0;
-                ids.forEach(id => {
-                    sum += surveyAnswers[id] || 0;
-                });
-                scores[name] = parseFloat((sum / ids.length).toFixed(2));
+            let catCounts = {};
+            let catSums = {};
+            
+            // 初始化能力分類計數與加總
+            questions.forEach(q => {
+                catCounts[q.cat] = 0;
+                catSums[q.cat] = 0;
+            });
+            
+            // 累加填答數
+            questions.forEach(q => {
+                const ans = surveyAnswers[q.id] || 0;
+                catSums[q.cat] += ans;
+                catCounts[q.cat]++;
+            });
+            
+            // 計算各分類之算術平均值
+            for (let cat in catSums) {
+                if (catCounts[cat] > 0) {
+                    scores[cat] = parseFloat((catSums[cat] / catCounts[cat]).toFixed(2));
+                } else {
+                    scores[cat] = 0;
+                }
             }
             return scores;
         }
@@ -1645,7 +1655,6 @@ HC	小組長	盧怡利	陳惠滿
                 }
             });
         }
-
 
         // 生成優點與待精進指標清單
         function buildAdvantageAndDisadvantageLists(domainScores) {
@@ -1828,7 +1837,7 @@ HC	小組長	盧怡利	陳惠滿
                 return;
             }
 
-            // 5. 寫入精緻的正式 A4 PDF 報表版型 (移除了轉義字符，以在寫入時能將數值直接解析進去)
+            // 5. 寫入精緻的正式 A4 PDF 報表版型
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html lang="zh-TW">
@@ -1946,7 +1955,7 @@ HC	小組長	盧怡利	陳惠滿
                 "他評人姓名", "他評人單位", "他評人職稱", "與被評關係", "總平均分"
             ];
             
-            const domains = ["專業力", "彈性力", "溝通力", "領導力", "決策力", "培育力", "創新力", "關懷力", "執行力", "協同力"];
+            const domains = ["專業力", "彈性力", "團隊力", "辯證力", "溝通力", "執行力", "洞悉力", "影響力", "創新力", "真誠力"];
             domains.forEach(d => headers.push(`核心分-${d}`));
 
             questions.forEach(q => {
@@ -1973,7 +1982,7 @@ HC	小組長	盧怡利	陳惠滿
                 evalName, evalUnit, evalTitle, evalRelation, totalAvg
             ];
 
-            domains.forEach(d => rowData.push(domainScores[d]));
+            domains.forEach(d => rowData.push(domainScores[d] || 0));
 
             questions.forEach(q => {
                 rowData.push(surveyAnswers[q.id] || 0);
