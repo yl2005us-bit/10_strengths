@@ -468,15 +468,15 @@
                 </div>
 
                 <!-- 下一步或匯出 -->
-                <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 no-print">
+                <div id="result-export-actions" class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 no-print">
                     <button class="px-5 py-3 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition text-sm flex items-center justify-center" onclick="resetSurvey()">
                         <i class="fa-solid fa-redo mr-2"></i> 重置並填寫下一份
                     </button>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="printFormalReport()" class="px-5 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center shadow-md shadow-slate-800/10">
+                        <button id="print-pdf-btn" onclick="printFormalReport()" class="px-5 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center shadow-md shadow-slate-800/10">
                             <i class="fa-solid fa-print mr-2"></i> 列印 / 儲存 PDF 報表
                         </button>
-                        <button onclick="exportCSV()" class="px-5 py-3 bg-chimei-500 hover:bg-chimei-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center shadow-md shadow-chimei-500/15">
+                        <button id="export-csv-btn" onclick="exportCSV()" class="px-5 py-3 bg-chimei-500 hover:bg-chimei-600 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center shadow-md shadow-chimei-500/15">
                             <i class="fa-solid fa-file-excel mr-2"></i> 導出 CSV 結果表
                         </button>
                     </div>
@@ -959,15 +959,9 @@ HC\t小組長\t盧怡利\t陳惠滿
                 if (forceShow) {
                     el.classList.remove('hidden');
                 } else {
-                    el.classList.toggle('hidden');
+                    el.classList.add('hidden');
                 }
             });
-            
-            // 保存目前的開發者面板開啟喜好
-            if (devElements.length > 0) {
-                const isNowHidden = devElements[0].classList.contains('hidden');
-                localStorage.setItem('chimei_survey_dev_mode', isNowHidden ? 'false' : 'true');
-            }
         }
 
         function parseRosterAndBuildDatabase() {
@@ -1069,11 +1063,10 @@ HC\t小組長\t盧怡利\t陳惠滿
                 toggleMode();
                 loadGasUrl(); // 載入儲存的 API 網址
 
-                // 檢查快取中開發者模式是否已被開啟過，以決定預設狀態
-                const devModePref = localStorage.getItem('chimei_survey_dev_mode');
-                if (devModePref === 'true') {
-                    toggleDevMode(true); // 顯式強制開啟
-                }
+                // 管理者測試功能每次載入均預設隱藏，僅能透過密碼 930969 開啟
+                document.querySelectorAll('.dev-element').forEach(el => el.classList.add('hidden'));
+                ensureResultExportActionsVisible();
+                localStorage.removeItem('chimei_survey_dev_mode');
 
                 console.log(`名單載入完成，共 ${targetList.length} 人。`);
             } catch (error) {
@@ -1540,6 +1533,20 @@ HC\t小組長\t盧怡利\t陳惠滿
             }
         }
 
+        // 結果匯出功能屬於所有使用者，不受管理者模式控制
+        function ensureResultExportActionsVisible() {
+            const actions = document.getElementById('result-export-actions');
+            const printButton = document.getElementById('print-pdf-btn');
+            const csvButton = document.getElementById('export-csv-btn');
+
+            [actions, printButton, csvButton].forEach(element => {
+                if (element) {
+                    element.classList.remove('hidden');
+                    element.style.display = '';
+                }
+            });
+        }
+
         function transitionToAnalysisStep(domainScores) {
             // 更新列印報表專屬中繼資料
             const isOther = document.querySelector('input[name="evalMode"]:checked').value === 'other';
@@ -1567,12 +1574,22 @@ HC\t小組長\t盧怡利\t陳惠滿
 
             document.getElementById('print-time-meta').textContent = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
 
-            buildRadarChart(domainScores);
+            // 先顯示結果區，再建立 Chart.js 雷達圖。
+            // 若 Canvas 位於 hidden 容器中先建立圖表，部分瀏覽器會取得 0 尺寸而無法顯示。
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            ensureResultExportActionsVisible();
+
             buildAdvantageAndDisadvantageLists(domainScores);
             buildCommentsList();
 
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.remove('hidden');
+            requestAnimationFrame(() => {
+                buildRadarChart(domainScores);
+                if (myRadarChart) {
+                    myRadarChart.resize();
+                    myRadarChart.update('none');
+                }
+            });
 
             document.getElementById('step-node-3').className = "w-10 h-10 rounded-full bg-chimei-500 text-white flex items-center justify-center font-semibold shadow-lg transition-all duration-300";
             document.getElementById('progress-line').style.width = "100%";
@@ -1823,6 +1840,11 @@ HC\t小組長\t盧怡利\t陳惠滿
                 showAlert("🚨 找不到分析圖表，無法列印。");
                 return;
             }
+            // 確保雷達圖在列印前完成尺寸更新與繪製
+            if (myRadarChart) {
+                myRadarChart.resize();
+                myRadarChart.update('none');
+            }
             const chartImageBase64 = chartCanvas.toDataURL('image/png');
 
             // 2. 獲取基本資訊與分析數據
@@ -2024,6 +2046,19 @@ HC\t小組長\t盧怡利\t陳惠滿
             link.click();
             document.body.removeChild(link);
         }
+
+        // 管理者密碼欄按 Enter 直接驗證
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('dev-password-input');
+            if (passwordInput) {
+                passwordInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        verifyDevPassword();
+                    }
+                });
+            }
+        });
 
         // 暗黑模式控制
         function toggleDarkMode() {
